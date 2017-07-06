@@ -2095,7 +2095,9 @@
       setScroller();
       zombieRowNodeFromLastMouseWheelEvent = null;
 
-      setColumns(treeColumns.extractColumns());
+      if (treeColumns.hasDepth()) {
+        setColumns(treeColumns.extractColumns());
+      }
       render();
     }
 
