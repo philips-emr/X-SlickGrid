@@ -1793,7 +1793,7 @@
     }
 
     function getRowHeight(index) {
-       return options.rowHeights && options.rowHeights[index] ? options.rowHeights[index].height : options.rowHeight;
+       return options.rowHeights && options.rowHeights[index] && options.rowHeights[index].height ? options.rowHeights[index].height : options.rowHeight;
     }
 
     function getFrozenRowsHeight() {
