@@ -1793,7 +1793,9 @@
     }
 
     function getRowHeight(index) {
-       return options.rowHeights && options.rowHeights[index] && options.rowHeights[index].height ? options.rowHeights[index].height : options.rowHeight;
+      let rowHeight = options.rowHeights && options.rowHeights[index] && options.rowHeights[index].height;
+      rowHeight = rowHeight || (data && data[index] && data[index]._rowHeight);
+      return rowHeight || options.rowHeight;
     }
 
     function getFrozenRowsHeight() {
