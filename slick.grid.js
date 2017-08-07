@@ -2215,7 +2215,7 @@
       let i = 0;
       for (i = 0; i <= data.length; i++) {
         let rowHeight = getRowHeight(i);
-        if (point >= height && point <= height + rowHeight) {
+        if (point >= height && point < height + rowHeight) {
           return i;
         }
         height += rowHeight;
