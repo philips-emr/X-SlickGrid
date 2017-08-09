@@ -1798,6 +1798,15 @@
       return rowHeight || options.rowHeight;
     }
 
+    function getTotalRowHeight() {
+      let rowHeights = options.rowHeights || [];
+      let totalHeight = 0;
+      rowHeights.forEach((rowHeight) => {
+        totalHeight += rowHeight.height || options.rowHeight;
+      });
+      return totalHeight;
+    }
+
     function getFrozenRowsHeight() {
       if (options.frozenRow < 0) return 0;
       let totalHeight = 0;
@@ -2561,8 +2570,7 @@
 
     function getViewportHeight() {
       if (options.autoHeight) {
-        viewportH = options.rowHeight
-          * getDataLengthIncludingAddNew()
+        viewportH = getTotalRowHeight()
           + ( ( options.frozenColumn == -1 ) ? $headers.outerHeight() : 0 );
       } else {
         topPanelH = ( options.showTopPanel )
