@@ -1083,9 +1083,7 @@
 
       setSortColumns(sortColumns);
       setupColumnResize();
-      if (options.enableColumnReorder) {
-        setupColumnReorder();
-      }
+      setupColumnReorder();
     }
 
     function setupColumnSort() {
@@ -1218,86 +1216,90 @@
     }
 
     function setupColumnReorder() {
-      $headers.filter(":ui-sortable").sortable("destroy");
-      var columnScrollTimer = null;
+      if (options.enableColumnReorder) {
+        $headers.filter(":ui-sortable").sortable("destroy");
+        var columnScrollTimer = null;
 
-      function scrollColumnsRight() {
-        $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft + 10;
-      }
+        function scrollColumnsRight() {
+          $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft + 10;
+        }
 
-      function scrollColumnsLeft() {
-        $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft - 10;
-      }
+        function scrollColumnsLeft() {
+          $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft - 10;
+        }
 
-	  var canDragScroll;
-      $headers.sortable({
-        containment: "parent",
-        distance: 3,
-        axis: "x",
-        cursor: "default",
-        tolerance: "intersection",
-        helper: "clone",
-        placeholder: "slick-sortable-placeholder ui-state-default slick-header-column",
-        start: function (e, ui) {
-          ui.placeholder.width(ui.helper.outerWidth() - headerColumnWidthDiff);
-          canDragScroll = !hasFrozenColumns() ||
-            (ui.placeholder.offset().left + ui.placeholder.width()) > $viewportScrollContainerX.offset().left;
-	      $(ui.helper).addClass("slick-header-column-active");
-        },
-        beforeStop: function (e, ui) {
-          $(ui.helper).removeClass("slick-header-column-active");
-        },
-        sort: function (e, ui) {
-          if (canDragScroll && e.originalEvent.pageX > $container[0].clientWidth) {
-            if (!(columnScrollTimer)) {
-              columnScrollTimer = setInterval(
-                scrollColumnsRight, 100);
+        var canDragScroll;
+        $headers.sortable({
+          containment: "parent",
+          distance: 3,
+          axis: "x",
+          cursor: "default",
+          tolerance: "intersection",
+          helper: "clone",
+          placeholder: "slick-sortable-placeholder ui-state-default slick-header-column",
+          start: function (e, ui) {
+            ui.placeholder.width(ui.helper.outerWidth() - headerColumnWidthDiff);
+            canDragScroll = !hasFrozenColumns() ||
+              (ui.placeholder.offset().left + ui.placeholder.width()) > $viewportScrollContainerX.offset().left;
+          $(ui.helper).addClass("slick-header-column-active");
+          },
+          beforeStop: function (e, ui) {
+            $(ui.helper).removeClass("slick-header-column-active");
+          },
+          sort: function (e, ui) {
+            if (canDragScroll && e.originalEvent.pageX > $container[0].clientWidth) {
+              if (!(columnScrollTimer)) {
+                columnScrollTimer = setInterval(
+                  scrollColumnsRight, 100);
+              }
+            } else if (canDragScroll && e.originalEvent.pageX < $viewportScrollContainerX.offset().left) {
+              if (!(columnScrollTimer)) {
+                columnScrollTimer = setInterval(
+                  scrollColumnsLeft, 100);
+              }
+            } else {
+              clearInterval(columnScrollTimer);
+              columnScrollTimer = null;
             }
-          } else if (canDragScroll && e.originalEvent.pageX < $viewportScrollContainerX.offset().left) {
-            if (!(columnScrollTimer)) {
-              columnScrollTimer = setInterval(
-                scrollColumnsLeft, 100);
-            }
-          } else {
+          },
+          stop: function (e, ui) {
+            var cancel = false;
             clearInterval(columnScrollTimer);
             columnScrollTimer = null;
+            var limit = null;
+
+            if (treeColumns.hasDepth()) {
+              var validPositionInGroup = columnPositionValidInGroup(ui.item);
+              limit = validPositionInGroup.limit;
+
+              cancel = !validPositionInGroup.valid;
+
+              if (cancel)
+                alert(validPositionInGroup.message);
+            }
+
+            if (cancel || !getEditorLock().commitCurrentEdit()) {
+              $(this).sortable("cancel");
+              return;
+            }
+
+            var reorderedIds = $headerL.sortable("toArray");
+            reorderedIds = reorderedIds.concat($headerR.sortable("toArray"));
+
+            var reorderedColumns = [];
+            for (var i = 0; i < reorderedIds.length; i++) {
+              reorderedColumns.push(columns[getColumnIndex(reorderedIds[i].replace(uid, ""))]);
+            }
+            setColumns(reorderedColumns);
+
+            trigger(self.onColumnsReordered, { impactedColumns : getImpactedColumns( limit ) });
+            e.stopPropagation();
+            setupColumnResize();
           }
-        },
-        stop: function (e, ui) {
-          var cancel = false;
-          clearInterval(columnScrollTimer);
-          columnScrollTimer = null;
-          var limit = null;
-
-          if (treeColumns.hasDepth()) {
-            var validPositionInGroup = columnPositionValidInGroup(ui.item);
-            limit = validPositionInGroup.limit;
-
-            cancel = !validPositionInGroup.valid;
-
-            if (cancel)
-              alert(validPositionInGroup.message);
-          }
-
-          if (cancel || !getEditorLock().commitCurrentEdit()) {
-            $(this).sortable("cancel");
-            return;
-          }
-
-          var reorderedIds = $headerL.sortable("toArray");
-          reorderedIds = reorderedIds.concat($headerR.sortable("toArray"));
-
-          var reorderedColumns = [];
-          for (var i = 0; i < reorderedIds.length; i++) {
-            reorderedColumns.push(columns[getColumnIndex(reorderedIds[i].replace(uid, ""))]);
-          }
-          setColumns(reorderedColumns);
-
-          trigger(self.onColumnsReordered, { impactedColumns : getImpactedColumns( limit ) });
-          e.stopPropagation();
-          setupColumnResize();
-        }
-      });
+        });
+      } else {
+        $headers.filter(":ui-sortable").sortable("destroy");
+      }
     }
 
 	function getImpactedColumns( limit ) {
@@ -2117,6 +2119,7 @@
       validateAndEnforceOptions();
 
       setFrozenOptions();
+      setupColumnReorder();
       setScroller();
       zombieRowNodeFromLastMouseWheelEvent = null;
 
