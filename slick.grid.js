@@ -1564,9 +1564,7 @@
     }
 
     function setFrozenOptions() {
-      options.frozenColumn = ( options.frozenColumn >= 0
-        && options.frozenColumn < columns.length
-        )
+      options.frozenColumn = ( options.frozenColumn >= 0 )
         ? parseInt(options.frozenColumn)
         : -1;
 
