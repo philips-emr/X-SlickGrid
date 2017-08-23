@@ -2117,6 +2117,7 @@
       validateAndEnforceOptions();
 
       setFrozenOptions();
+	  setPaneVisibility();
       setupColumnReorder();
       setScroller();
       zombieRowNodeFromLastMouseWheelEvent = null;
@@ -3564,7 +3565,12 @@
         return;
       }
 
-      trigger(self.onContextMenu, {}, e);
+      var cell = getCellFromEvent(e);
+      if (!cell || (currentEditor !== null && activeRow == cell.row && activeCell == cell.cell)) {
+        return;
+      }
+
+      trigger(self.onContextMenu, {row: cell.row, cell: cell.cell}, e);
     }
 
     function handleDblClick(e) {
