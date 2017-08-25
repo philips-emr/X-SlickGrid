@@ -710,7 +710,9 @@
         $headerR.width(headersWidthR);
 
         if (hasFrozenColumns()) {
-          $canvasTopR.width(canvasWidthR);
+          if (options.fullWidthRows) {
+            $canvasTopR.css("min-width", "100%");
+          }
 
           $paneHeaderL.width(canvasWidthL);
           $paneHeaderR.css('left', canvasWidthL);
@@ -763,6 +765,10 @@
           if (hasFrozenRows) {
             $viewportBottomL.width('100%');
             $canvasBottomL.width(canvasWidthL);
+          }
+
+          if (options.fullWidthRows) {
+            $canvasTopL.css("min-width", "100%");
           }
         }
 
