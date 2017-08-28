@@ -710,6 +710,7 @@
         $headerR.width(headersWidthR);
 
         if (hasFrozenColumns()) {
+          $canvasTopR.width(canvasWidthR);
           if (options.fullWidthRows) {
             $canvasTopR.css("min-width", "100%");
           }
