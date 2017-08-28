@@ -2040,7 +2040,9 @@
       }
 
       setCellCssStyles(options.selectedCellCssClass, hash);
-
+      if (selectedRows && selectedRows.length > 0 && !selectedRows.includes(activeRow)) {
+        activeRow = selectedRows[0];
+      }
       trigger(self.onSelectedRowsChanged, {rows: getSelectedRows()}, e);
     }
 
