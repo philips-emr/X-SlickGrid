@@ -100,7 +100,8 @@
       defaultFormatter: defaultFormatter,
       forceSyncScrolling: false,
       addNewRowCssClass: "new-row",
-      doPaging: true
+      doPaging: true,
+      headerTopPanelGap: 0
     };
 
     var columnDefaults = {
@@ -2662,7 +2663,7 @@
       }
 
       $paneTopL.css({
-        'top': $paneHeaderL.height(), 'height': paneTopH
+        'top': $paneHeaderL.height() + options.headerTopPanelGap, 'height': paneTopH
       });
 
       var paneBottomTop = $paneTopL.position().top
@@ -2672,7 +2673,7 @@
 
       if (hasFrozenColumns()) {
         $paneTopR.css({
-          'top': $paneHeaderL.height(), 'height': paneTopH
+          'top': $paneHeaderL.height() + options.headerTopPanelGap, 'height': paneTopH
         });
 
         $viewportTopR.height(viewportTopH);
