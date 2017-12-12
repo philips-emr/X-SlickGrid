@@ -332,17 +332,7 @@
 
       // Cache the header scroller containers
       $headerScroller = $().add($headerScrollerL).add($headerScrollerR);
-      /*
-      if (treeColumns.hasDepth()) {
-        $groupHeadersL = [], $groupHeadersR = [];
-        for (var index = 0; index < treeColumns.getDepth() - 1; index++) {
-          $groupHeadersL[index] = $("<div class='slick-group-header-columns slick-group-header-columns-left' style='left:-1000px' />").appendTo($headerScrollerL);
-          $groupHeadersR[index] = $("<div class='slick-group-header-columns slick-group-header-columns-right' style='left:-1000px' />").appendTo($headerScrollerR);
-        }
 
-        $groupHeaders = $().add($groupHeadersL).add($groupHeadersR);
-      }
-      */
       // Append the columnn containers to the headers
       $headerL = $("<div class='slick-header-columns slick-header-columns-left' style='left:-1000px' />").appendTo($headerScrollerL);
       $headerR = $("<div class='slick-header-columns slick-header-columns-right' style='left:-1000px' />").appendTo($headerScrollerR);
@@ -2081,7 +2071,7 @@
       $groupHeadersL = [], $groupHeadersR = [];
       createGroupHeaders(_treeColumns);
     }
-    
+
     function setColumns(columnDefinitions) {
       var _treeColumns = new Slick.TreeColumns(columnDefinitions);
 
