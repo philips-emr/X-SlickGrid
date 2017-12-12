@@ -332,7 +332,7 @@
 
       // Cache the header scroller containers
       $headerScroller = $().add($headerScrollerL).add($headerScrollerR);
-
+      /*
       if (treeColumns.hasDepth()) {
         $groupHeadersL = [], $groupHeadersR = [];
         for (var index = 0; index < treeColumns.getDepth() - 1; index++) {
@@ -342,14 +342,14 @@
 
         $groupHeaders = $().add($groupHeadersL).add($groupHeadersR);
       }
-
+      */
       // Append the columnn containers to the headers
       $headerL = $("<div class='slick-header-columns slick-header-columns-left' style='left:-1000px' />").appendTo($headerScrollerL);
       $headerR = $("<div class='slick-header-columns slick-header-columns-right' style='left:-1000px' />").appendTo($headerScrollerR);
 
       // Cache the header columns
       $headers = $().add($headerL).add($headerR);
-
+      createGroupHeaders(treeColumns);
       $headerRowScrollerL = $("<div class='ui-state-default slick-headerrow' />").appendTo($paneTopL);
       $headerRowScrollerR = $("<div class='ui-state-default slick-headerrow' />").appendTo($paneTopR);
 
@@ -1945,7 +1945,7 @@
               m.width += $headerColumn.outerWidth();
             })
 
-            $groupHeaderColumn.width(m.width - headerColumnWidthDiff);
+            $groupHeaderColumn.outerWidth(m.width - headerColumnWidthDiff);
 
           });
 
@@ -2060,9 +2060,36 @@
       }
     }
 
+    function createGroupHeaders(treeColumns) {
+      if (!treeColumns.hasDepth()) {
+        return;      
+      }
+      $groupHeadersL = [], $groupHeadersR = [];
+      for (var index = 0; index < treeColumns.getDepth() - 1; index++) {
+        $groupHeadersL[index] = $("<div class='slick-group-header-columns slick-group-header-columns-left' style='left:-1000px' />").insertBefore($headerL);
+        $groupHeadersR[index] = $("<div class='slick-group-header-columns slick-group-header-columns-right' style='left:-1000px' />").insertBefore($headerR);
+      }
+      $groupHeaders = $().add($groupHeadersL).add($groupHeadersR);
+    }
+
+    function recreateGroupHeaders(_treeColumns) {
+      if (!_treeColumns.hasDepth()) {
+        return;      
+      }
+      ($groupHeadersL || []).forEach((group) => group.remove());
+      ($groupHeadersR || []).forEach((group) => group.remove());
+      $groupHeadersL = [], $groupHeadersR = [];
+      createGroupHeaders(_treeColumns);
+    }
+    
     function setColumns(columnDefinitions) {
       var _treeColumns = new Slick.TreeColumns(columnDefinitions);
+
       if (_treeColumns.hasDepth()) {
+        if (!treeColumns.hasDepth() || _treeColumns.getDepth() !== _treeColumns) {
+          recreateGroupHeaders(_treeColumns);
+        }
+        
         treeColumns = _treeColumns;
         columns = treeColumns.extractColumns();
       } else {
