@@ -100,7 +100,8 @@
       defaultFormatter: defaultFormatter,
       forceSyncScrolling: false,
       addNewRowCssClass: "new-row",
-      doPaging: true
+      doPaging: true,
+      headerTopPanelGap: 0
     };
 
     var columnDefaults = {
@@ -701,6 +702,9 @@
 
         if (hasFrozenColumns()) {
           $canvasTopR.width(canvasWidthR);
+          if (options.fullWidthRows) {
+            $canvasTopR.css("min-width", "100%");
+          }
 
           $paneHeaderL.width(canvasWidthL);
           $paneHeaderR.css('left', canvasWidthL);
@@ -753,6 +757,10 @@
           if (hasFrozenRows) {
             $viewportBottomL.width('100%');
             $canvasBottomL.width(canvasWidthL);
+          }
+
+          if (options.fullWidthRows) {
+            $canvasTopL.css("min-width", "100%");
           }
         }
 
@@ -1554,9 +1562,7 @@
     }
 
     function setFrozenOptions() {
-      options.frozenColumn = ( options.frozenColumn >= 0
-        && options.frozenColumn < columns.length
-        )
+      options.frozenColumn = ( options.frozenColumn >= 0 )
         ? parseInt(options.frozenColumn)
         : -1;
 
@@ -2025,7 +2031,9 @@
       }
 
       setCellCssStyles(options.selectedCellCssClass, hash);
-
+      if (selectedRows && selectedRows.length > 0 && !selectedRows.includes(activeRow)) {
+        activeRow = selectedRows[0];
+      }
       trigger(self.onSelectedRowsChanged, {rows: getSelectedRows()}, e);
     }
 
@@ -2136,6 +2144,7 @@
       validateAndEnforceOptions();
 
       setFrozenOptions();
+	  setPaneVisibility();
       setupColumnReorder();
       setScroller();
       zombieRowNodeFromLastMouseWheelEvent = null;
@@ -2671,7 +2680,7 @@
       }
 
       $paneTopL.css({
-        'top': $paneHeaderL.height(), 'height': paneTopH
+        'top': $paneHeaderL.height() + options.headerTopPanelGap, 'height': paneTopH
       });
 
       var paneBottomTop = $paneTopL.position().top
@@ -2681,7 +2690,7 @@
 
       if (hasFrozenColumns()) {
         $paneTopR.css({
-          'top': $paneHeaderL.height(), 'height': paneTopH
+          'top': $paneHeaderL.height() + options.headerTopPanelGap, 'height': paneTopH
         });
 
         $viewportTopR.height(viewportTopH);
@@ -3583,7 +3592,12 @@
         return;
       }
 
-      trigger(self.onContextMenu, {}, e);
+      var cell = getCellFromEvent(e);
+      if (!cell || (currentEditor !== null && activeRow == cell.row && activeCell == cell.cell)) {
+        return;
+      }
+
+      trigger(self.onContextMenu, {row: cell.row, cell: cell.cell}, e);
     }
 
     function handleDblClick(e) {
