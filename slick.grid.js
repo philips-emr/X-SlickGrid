@@ -720,13 +720,23 @@
           }
 
           $paneHeaderL.width(canvasWidthL);
-          $paneHeaderR.css('left', canvasWidthL);
-          $paneHeaderR.css('right', canvasWidthR);//TODO: Changed this
+          if (options.direction == 'rtl') {
+            $paneHeaderR.css('left', canvasWidthR);
+            $paneHeaderR.css('right', canvasWidthL);//TODO: Changed this
+          } else {
+            $paneHeaderR.css('left', canvasWidthL);
+            $paneHeaderR.css('right', canvasWidthR);//TODO: Changed this
+          }
           $paneHeaderR.css('width', viewportW - canvasWidthL);
 
           $paneTopL.width(canvasWidthL);
-          $paneTopR.css('left', canvasWidthL);
-          $paneTopR.css('right', canvasWidthR);//TODO: Changed this
+          if (options.direction == 'rtl') {
+            $paneTopR.css('left', canvasWidthR);
+            $paneTopR.css('right', canvasWidthL);//TODO: Changed this
+          } else {
+            $paneTopR.css('left', canvasWidthL);
+            $paneTopR.css('right', canvasWidthR);//TODO: Changed this
+          }
           $paneTopR.css('width', viewportW - canvasWidthL);
 
           $headerRowScrollerL.width(canvasWidthL);
@@ -1049,10 +1059,8 @@
       $headerRowR.empty();
 
       var reverseColumns = Array.from(columns).reverse();
-      //columns.reverse();
       for (var i = 0; i < columns.length; i++) {
-      //for (var i = columns.length - 1; i >= 0; i--) {
-        var m = reverseColumns[i];
+        var m = columns[i];
 
         var $headerTarget = hasFrozenColumns() ? ((i <= options.frozenColumn) ? $headerL : $headerR) : $headerL;
         var $headerRowTarget = hasFrozenColumns() ? ((i <= options.frozenColumn) ? $headerRowL : $headerRowR) : $headerRowL;
@@ -1308,9 +1316,9 @@
             for (var i = 0; i < reorderedIds.length; i++) {
               reorderedColumns.push(columns[getColumnIndex(reorderedIds[i].replace(uid, ""))]);
             }
-            if (options.direction == 'rtl') {
+            /*if (options.direction == 'rtl') {
               reorderedColumns.reverse();
-            }
+            }*/
             setColumns(reorderedColumns);
 
             trigger(self.onColumnsReordered, { impactedColumns : getImpactedColumns( limit ) });
@@ -1422,7 +1430,7 @@
             minPageX = pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight);
           })
           .bind("drag", function (e, dd) {
-            var actualMinWidth, d = Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX, x;
+            var actualMinWidth, d = (options.direction == 'rtl' ? pageX - Math.min(maxPageX, Math.max(minPageX, e.pageX)) : Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX), x;
             if (d < 0) { // shrink column
               x = d;
 
@@ -1988,19 +1996,36 @@
 
     function applyColumnWidths() {
       var x = 0, w, rule;
-      for (var i = 0; i < columns.length; i++) {
-        w = columns[i].width;
+      var theColumns;
+      if (options.direction == 'rtl') {
+         theColumns = Array.from(columns).reverse();
+      } else {
+         theColumns = columns;
+      }
+      for (var j = 0; j < theColumns.length; j++) {
+        var i = j;
+        if (options.direction == 'rtl') {
+          i = theColumns.length - j - 1;
+        }
+        w = theColumns[i].width;
 
         rule = getColumnCssRules(i);
-        rule.left.style.left = x + "px";
-        rule.right.style.right = (((options.frozenColumn != -1 && i > options.frozenColumn) ? canvasWidthR : canvasWidthL) - x - w) + "px";
+        if (options.direction == 'rtl') {
+          rule.left.style.left = (((options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn)) ? canvasWidthR : canvasWidthL) - x - w) + "px"
+          rule.right.style.right = x + "px";
+        } else {
+          rule.left.style.left = x + "px";
+          rule.right.style.right = (((options.frozenColumn != -1 && i > options.frozenColumn) ? canvasWidthR : canvasWidthL) - x - w) + "px";
+        }
 
+
+        var frozenColumn = options.direction == 'rtl' ? theColumns.length - 1 - options.frozenColumn : options.frozenColumn;
         // If this column is frozen, reset the css left value since the
         // column starts in a new viewport.
-        if (options.frozenColumn == i) {
+        if (frozenColumn == i) {
           x = 0;
         } else {
-          x += columns[i].width;
+          x += theColumns[i].width;
         }
       }
     }
@@ -2437,18 +2462,21 @@
         }
 
         // Do not render cells outside of the viewport.
-        if (columnPosRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {
+        let frozenColumn = options.direction == 'rtl' ? (options.frozenColumn - i - 1) : options.frozenColumn;
+        if (options.direction == 'rtl' || columnPosRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {//TOOD: Change this
           if (columnPosLeft[i] > range.rightPx) {
             // All columns to the right are outside the range.
-            break;
+            //break;
           }
 
-          if (hasFrozenColumns() && ( i > options.frozenColumn )) {
-            appendCellHtml(stringArrayR, row, i, colspan, d);
+          let indexToCompare = options.direction == 'rtl' ? (ii - i - 1) : i;
+          let frozenColumn = options.direction == 'rtl' ? (ii - options.frozenColumn - 1) : options.frozenColumn;
+          if (hasFrozenColumns() && ( options.direction == 'rtl' ? (indexToCompare < frozenColumn) : (indexToCompare > frozenColumn))) {
+            appendCellHtml(stringArrayR, row, indexToCompare, colspan, d);
           } else {
-            appendCellHtml(stringArrayL, row, i, colspan, d);
+            appendCellHtml(stringArrayL, row, indexToCompare, colspan, d);
           }
-        } else if (hasFrozenColumns() && ( i <= options.frozenColumn )) {
+        } else if (hasFrozenColumns() && ( i <= frozenColumn )) {
           appendCellHtml(stringArrayL, row, i, colspan, d);
         }
 
@@ -2465,7 +2493,12 @@
     }
 
     function appendCellHtml(stringArray, row, cell, colspan, item) {
-      var m = columns[cell];
+      var m;
+      if (options.direction == 'rtl') {
+        m = columns[columns.length - 1 - cell];
+      } else {
+        m = columns[cell];
+      }
       var cellCss = "slick-cell l" + cell + " r" + Math.min(columns.length - 1, cell + colspan - 1) +
           (m.cssClass ? " " + m.cssClass : "");
 
@@ -3045,13 +3078,16 @@
 
       var processedRow;
       var $node;
+      let columnsLength = columns.length;
       while ((processedRow = processedRows.pop()) != null) {
         cacheEntry = rowsCache[processedRow];
         var columnIdx;
         while ((columnIdx = cacheEntry.cellRenderQueue.pop()) != null) {
           $node = $(x).children().last();
 
-          if (hasFrozenColumns() && ( columnIdx > options.frozenColumn )) {
+          //let indexToCompare = options.direction == 'rtl' ? (columnsLength - columnIdx - 1) : columnIdx;
+          let frozenColumn = options.direction == 'rtl' ? (columnsLength - options.frozenColumn - 1) : options.frozenColumn;
+          if (hasFrozenColumns() && ( options.direction == 'rtl' ? (columnIdx < frozenColumn) : (columnIdx > frozenColumn))) {
             $(cacheEntry.rowNode[1]).append($node);
           } else {
             $(cacheEntry.rowNode[0]).append($node);
