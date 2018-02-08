@@ -168,7 +168,7 @@
     var tabbingDirection = 1;
     var $activeCanvasNode;
     var $activeViewportNode;
-    var activePosX;//TODO: Check this
+    var activePosX;
     var activeRow, activeCell;
     var activeCellNode = null;
     var currentEditor = null;
@@ -181,9 +181,9 @@
     var prevScrollTop = 0;
     var scrollTop = 0;
     var lastRenderedScrollTop = 0;
-    var lastRenderedScrollLeft = 0;//TODO: Check this
-    var prevScrollLeft = 0;//TODO: Check this
-    var scrollLeft = 0;//TODO: Check this
+    var lastRenderedScrollLeft = 0;
+    var prevScrollLeft = 0;
+    var scrollLeft = 0;
 
     var selectionModel;
     var selectedRows = [];
@@ -258,7 +258,7 @@
     var $canvasBottomL;
     var $canvasBottomR;
 
-    var $viewportScrollContainerX;//TODO: Check this
+    var $viewportScrollContainerX;
     var $viewportScrollContainerY;
     var $headerScrollContainer;
     var $headerRowScrollContainer;
@@ -318,7 +318,7 @@
         $container.css("position", "relative");
       }
 
-      $focusSink = $("<div tabIndex='0' hideFocus style='position:fixed;width:0;height:0;top:0;left:0;outline:0;'></div>").appendTo($container);//TODO: Check this
+      $focusSink = $("<div tabIndex='0' hideFocus style='position:fixed;width:0;height:0;top:0;left:0;outline:0;'></div>").appendTo($container);
 
       // Containers used for scrolling frozen columns and rows
       $paneHeaderL = $("<div class='slick-pane slick-pane-header slick-pane-left' tabIndex='0' />").appendTo($container);
@@ -336,7 +336,7 @@
       $headerScroller = $().add($headerScrollerL).add($headerScrollerR);
 
       // Append the columnn containers to the headers
-      if (isRTL()) {//TODO: Changed this
+      if (isRTL()) {
         $headerL = $("<div class='slick-header-columns slick-header-columns-left' style='right:-1000px' />").appendTo($headerScrollerL);
         $headerR = $("<div class='slick-header-columns slick-header-columns-right' style='right:-1000px' />").appendTo($headerScrollerR);
       } else {
@@ -352,7 +352,7 @@
 
       $headerRowScroller = $().add($headerRowScrollerL).add($headerRowScrollerR);
 
-      //TODO: Check this
+
       $headerRowSpacerL = $("<div style='display:block;height:1px;position:absolute;top:0;left:0;'></div>")
         .css("width", getCanvasWidth() + scrollbarDimensions.width + "px")
         .appendTo($headerRowScrollerL);
@@ -417,7 +417,7 @@
 
       $footerRowScroller = $().add($footerRowScrollerL).add($footerRowScrollerR);
 
-      //TODO: Check this
+
       $footerRowSpacerL = $("<div style='display:block;height:1px;position:absolute;top:0;left:0;'></div>")
         .css("width", getCanvasWidth() + scrollbarDimensions.width + "px")
         .appendTo($footerRowScrollerL);
@@ -722,20 +722,20 @@
           $paneHeaderL.width(canvasWidthL);
           if (isRTL()) {
             $paneHeaderR.css('left', canvasWidthR);
-            $paneHeaderR.css('right', canvasWidthL);//TODO: Changed this
+            $paneHeaderR.css('right', canvasWidthL);
           } else {
             $paneHeaderR.css('left', canvasWidthL);
-            $paneHeaderR.css('right', canvasWidthR);//TODO: Changed this
+            $paneHeaderR.css('right', canvasWidthR);
           }
           $paneHeaderR.css('width', viewportW - canvasWidthL);
 
           $paneTopL.width(canvasWidthL);
           if (isRTL()) {
             $paneTopR.css('left', canvasWidthR);
-            $paneTopR.css('right', canvasWidthL);//TODO: Changed this
+            $paneTopR.css('right', canvasWidthL);
           } else {
             $paneTopR.css('left', canvasWidthL);
-            $paneTopR.css('right', canvasWidthR);//TODO: Changed this
+            $paneTopR.css('right', canvasWidthR);
           }
           $paneTopR.css('width', viewportW - canvasWidthL);
 
@@ -1231,7 +1231,7 @@
     function columnPositionValidInGroup($item) {
       var currentPosition = currentPositionInHeader($item[0].id);
       var limit = limitPositionInGroup($item.data('column').id);
-      var positionValid = limit.start <= currentPosition && currentPosition <= limit.end;//TODO: Check this
+      var positionValid = limit.start <= currentPosition && currentPosition <= limit.end;
 
       return {
     	limit: limit,
@@ -1246,11 +1246,11 @@
         var columnScrollTimer = null;
 
         function scrollColumnsRight() {
-          $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft + 10;//TODO: Check this
+          $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft + 10;
         }
 
         function scrollColumnsLeft() {
-          $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft - 10;//TODO: Check this
+          $viewportScrollContainerX[0].scrollLeft = $viewportScrollContainerX[0].scrollLeft - 10;
         }
 
         var canDragScroll;
@@ -1266,7 +1266,7 @@
           start: function (e, ui) {
             ui.placeholder.width(ui.helper.outerWidth() - headerColumnWidthDiff);
             canDragScroll = !hasFrozenColumns() ||
-              (ui.placeholder.offset().left + ui.placeholder.width()) > $viewportScrollContainerX.offset().left;//TODO: Check this
+              (ui.placeholder.offset().left + ui.placeholder.width()) > $viewportScrollContainerX.offset().left;
           $(ui.helper).addClass("slick-header-column-active");
           },
           beforeStop: function (e, ui) {
@@ -1382,7 +1382,7 @@
               columns[i].previousWidth = $(e).outerWidth();
             });
             if (options.forceFitColumns) {
-              shrinkLeewayOnRight = 0;//TODO: Check this
+              shrinkLeewayOnRight = 0;
               stretchLeewayOnRight = 0;
               // colums on right affect maxPageX/minPageX
               for (j = i + 1; j < columnElements.length; j++) {
@@ -1399,7 +1399,7 @@
                 }
               }
             }
-            var shrinkLeewayOnLeft = 0, stretchLeewayOnLeft = 0;//TODO: Check this
+            var shrinkLeewayOnLeft = 0, stretchLeewayOnLeft = 0;
             for (j = 0; j <= i; j++) {
               // columns on left only affect minPageX
               c = columns[j];
