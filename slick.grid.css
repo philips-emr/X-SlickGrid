@@ -80,7 +80,12 @@ classes should alter those!
   display: block;
   cursor: col-resize;
   width: 4px;
+  /*rtl:begin:remove*/
+  right: 0px;
+  /*rtl:end:remove*/
+  /*rtl:raw:
   left: 0px;
+  */
   top: 0;
   height: 100%;
 }
