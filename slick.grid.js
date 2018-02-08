@@ -336,7 +336,7 @@
       $headerScroller = $().add($headerScrollerL).add($headerScrollerR);
 
       // Append the columnn containers to the headers
-      if (options.direction == 'rtl') {//TODO: Changed this
+      if (isRTL()) {//TODO: Changed this
         $headerL = $("<div class='slick-header-columns slick-header-columns-left' style='right:-1000px' />").appendTo($headerScrollerL);
         $headerR = $("<div class='slick-header-columns slick-header-columns-right' style='right:-1000px' />").appendTo($headerScrollerR);
       } else {
@@ -603,7 +603,7 @@
 
     function measureScrollbar() {
       var $c;
-      if (options.direction == 'rtl') {
+      if (isRTL()) {
         $c = $("<div style='position:absolute; top:-10000px; right:-10000px; width:100px; height:100px; overflow:scroll;'></div>").appendTo("body");
       } else {
         $c = $("<div style='position:absolute; top:-10000px; left:-10000px; width:100px; height:100px; overflow:scroll;'></div>").appendTo("body");
@@ -720,7 +720,7 @@
           }
 
           $paneHeaderL.width(canvasWidthL);
-          if (options.direction == 'rtl') {
+          if (isRTL()) {
             $paneHeaderR.css('left', canvasWidthR);
             $paneHeaderR.css('right', canvasWidthL);//TODO: Changed this
           } else {
@@ -730,7 +730,7 @@
           $paneHeaderR.css('width', viewportW - canvasWidthL);
 
           $paneTopL.width(canvasWidthL);
-          if (options.direction == 'rtl') {
+          if (isRTL()) {
             $paneTopR.css('left', canvasWidthR);
             $paneTopR.css('right', canvasWidthL);//TODO: Changed this
           } else {
@@ -1316,7 +1316,7 @@
             for (var i = 0; i < reorderedIds.length; i++) {
               reorderedColumns.push(columns[getColumnIndex(reorderedIds[i].replace(uid, ""))]);
             }
-            /*if (options.direction == 'rtl') {
+            /*if (isRTL()) {
               reorderedColumns.reverse();
             }*/
             setColumns(reorderedColumns);
@@ -1430,7 +1430,7 @@
             minPageX = pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight);
           })
           .bind("drag", function (e, dd) {
-            var actualMinWidth, d = (options.direction == 'rtl' ? pageX - Math.min(maxPageX, Math.max(minPageX, e.pageX)) : Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX), x;
+            var actualMinWidth, d = (isRTL() ? pageX - Math.min(maxPageX, Math.max(minPageX, e.pageX)) : Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX), x;
             if (d < 0) { // shrink column
               x = d;
 
@@ -1736,8 +1736,8 @@
       $style = $("<style type='text/css' rel='stylesheet' />").appendTo($("head"));
       var rowHeight = (options.rowHeight - cellHeightDiff);
       var rules = [
-          "." + uid + " .slick-group-header-column { " + (options.direction == 'rtl' ? "right: 1000px;" : "left: 1000px;") + "}",
-          "." + uid + " .slick-header-column { " + (options.direction == 'rtl' ? "right: 1000px;" : "left: 1000px;") + " }",
+          "." + uid + " .slick-group-header-column { " + (isRTL() ? "right: 1000px;" : "left: 1000px;") + "}",
+          "." + uid + " .slick-header-column { " + (isRTL() ? "right: 1000px;" : "left: 1000px;") + " }",
           "." + uid + " .slick-top-panel { height:" + options.topPanelHeight + "px; }",
           "." + uid + " .slick-headerrow-columns { height:" + options.headerRowHeight + "px; }",
           "." + uid + " .slick-cell { height:" + rowHeight + "px; }",
@@ -1997,20 +1997,20 @@
     function applyColumnWidths() {
       var x = 0, w, rule;
       var theColumns;
-      if (options.direction == 'rtl') {
+      if (isRTL()) {
          theColumns = Array.from(columns).reverse();
       } else {
          theColumns = columns;
       }
       for (var j = 0; j < theColumns.length; j++) {
         var i = j;
-        if (options.direction == 'rtl') {
+        if (isRTL()) {
           i = theColumns.length - j - 1;
         }
         w = theColumns[i].width;
 
         rule = getColumnCssRules(i);
-        if (options.direction == 'rtl') {
+        if (isRTL()) {
           rule.left.style.left = (((options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn)) ? canvasWidthR : canvasWidthL) - x - w) + "px"
           rule.right.style.right = x + "px";
         } else {
@@ -2019,7 +2019,7 @@
         }
 
 
-        var frozenColumn = options.direction == 'rtl' ? theColumns.length - 1 - options.frozenColumn : options.frozenColumn;
+        var frozenColumn = isRTL() ? theColumns.length - 1 - options.frozenColumn : options.frozenColumn;
         // If this column is frozen, reset the css left value since the
         // column starts in a new viewport.
         if (frozenColumn == i) {
@@ -2112,7 +2112,7 @@
       }
       $groupHeadersL = [], $groupHeadersR = [];
       for (var index = 0; index < treeColumns.getDepth() - 1; index++) {
-        if (options.direction == 'rtl') {
+        if (isRTL()) {
           $groupHeadersL[index] = $("<div class='slick-group-header-columns slick-group-header-columns-left' style='right:-1000px' />").insertBefore($headerL);
           $groupHeadersR[index] = $("<div class='slick-group-header-columns slick-group-header-columns-right' style='right:-1000px' />").insertBefore($headerR);
         } else {
@@ -2462,16 +2462,16 @@
         }
 
         // Do not render cells outside of the viewport.
-        let frozenColumn = options.direction == 'rtl' ? (options.frozenColumn - i - 1) : options.frozenColumn;
-        if (options.direction == 'rtl' || columnPosRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {//TOOD: Change this
+        let frozenColumn = isRTL() ? (options.frozenColumn - i - 1) : options.frozenColumn;
+        if (isRTL() || columnPosRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {//TOOD: Change this
           if (columnPosLeft[i] > range.rightPx) {
             // All columns to the right are outside the range.
             //break;
           }
 
-          let indexToCompare = options.direction == 'rtl' ? (ii - i - 1) : i;
-          let frozenColumn = options.direction == 'rtl' ? (ii - options.frozenColumn - 1) : options.frozenColumn;
-          if (hasFrozenColumns() && ( options.direction == 'rtl' ? (indexToCompare < frozenColumn) : (indexToCompare > frozenColumn))) {
+          let indexToCompare = isRTL() ? (ii - i - 1) : i;
+          let frozenColumn = isRTL() ? (ii - options.frozenColumn - 1) : options.frozenColumn;
+          if (hasFrozenColumns() && ( isRTL() ? (indexToCompare < frozenColumn) : (indexToCompare > frozenColumn))) {
             appendCellHtml(stringArrayR, row, indexToCompare, colspan, d);
           } else {
             appendCellHtml(stringArrayL, row, indexToCompare, colspan, d);
@@ -2494,7 +2494,7 @@
 
     function appendCellHtml(stringArray, row, cell, colspan, item) {
       var m;
-      if (options.direction == 'rtl') {
+      if (isRTL()) {
         m = columns[columns.length - 1 - cell];
       } else {
         m = columns[cell];
@@ -2982,7 +2982,7 @@
         i = i | 0;
 
         // Ignore frozen columns
-        if (i <= options.frozenColumn) {
+        if (i <= options.frozenColumn || (isRTL() && i >= (cacheEntry.cellNodesByColumnIdx.length - 1 - options.frozenColumn))) {
           continue;
         }
 
@@ -3085,9 +3085,9 @@
         while ((columnIdx = cacheEntry.cellRenderQueue.pop()) != null) {
           $node = $(x).children().last();
 
-          //let indexToCompare = options.direction == 'rtl' ? (columnsLength - columnIdx - 1) : columnIdx;
-          let frozenColumn = options.direction == 'rtl' ? (columnsLength - options.frozenColumn - 1) : options.frozenColumn;
-          if (hasFrozenColumns() && ( options.direction == 'rtl' ? (columnIdx < frozenColumn) : (columnIdx > frozenColumn))) {
+          //let indexToCompare = isRTL() ? (columnsLength - columnIdx - 1) : columnIdx;
+          let frozenColumn = isRTL() ? (columnsLength - options.frozenColumn - 1) : options.frozenColumn;
+          if (hasFrozenColumns() && ( isRTL() ? (columnIdx < frozenColumn) : (columnIdx > frozenColumn))) {
             $(cacheEntry.rowNode[1]).append($node);
           } else {
             $(cacheEntry.rowNode[0]).append($node);
@@ -3315,7 +3315,12 @@
         prevScrollLeft = scrollLeft;
 
         $viewportScrollContainerX[0].scrollLeft = scrollLeft;
-        $headerScrollContainer[0].scrollLeft = scrollLeft;
+        if (isRTL()) {
+          //Ugly hack to solve a header positioning problem when scrolling in rtl mode
+          $headerScrollContainer[0].scrollLeft = scrollLeft + $headerScrollerL.width() + scrollbarDimensions.width;
+        } else {
+          $headerScrollContainer[0].scrollLeft = scrollLeft;
+        }
         $topPanelScroller[0].scrollLeft = scrollLeft;
         $headerRowScrollContainer[0].scrollLeft = scrollLeft;
         $footerRowScrollContainer[0].scrollLeft = scrollLeft;
@@ -4724,6 +4729,10 @@
         throw "Row heights are not set";
       }
       options.rowHeights = heights;
+    }
+
+    function isRTL() {
+      return options.direction === 'rtl';
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////
