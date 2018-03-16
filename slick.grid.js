@@ -2011,11 +2011,27 @@
 
         rule = getColumnCssRules(i);
         if (isRTL()) {
-          rule.left.style.left = (((options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn)) ? canvasWidthR : canvasWidthL) - x - w) + "px"
+          var shouldUseRightWidth = (options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn));
+
+          var availableWidth = options.fullWidthRows ?
+            (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+            (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+
+          var leftWidth = (availableWidth - canvasWidthL) - (x + w);
+
+          rule.left.style.left = leftWidth + "px";
           rule.right.style.right = x + "px";
         } else {
+          var shouldUseRightWidth = (options.frozenColumn != -1 && i > options.frozenColumn);
+
+          var availableWidth = options.fullWidthRows ?
+            (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+            (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+
+          var rightWidth = (availableWidth - canvasWidthL) - (x + w);
+
           rule.left.style.left = x + "px";
-          rule.right.style.right = (((options.frozenColumn != -1 && i > options.frozenColumn) ? canvasWidthR : canvasWidthL) - x - w) + "px";
+          rule.right.style.right = rightWidth + "px";
         }
 
 
