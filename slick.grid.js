@@ -2002,6 +2002,8 @@
       } else {
          theColumns = columns;
       }
+
+      var canvasWidth = getCanvasWidth();
       for (var j = 0; j < theColumns.length; j++) {
         var i = j;
         if (isRTL()) {
@@ -2011,13 +2013,18 @@
 
         rule = getColumnCssRules(i);
         if (isRTL()) {
-          rule.left.style.left = (((options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn)) ? canvasWidthR : canvasWidthL) - x - w) + "px"
-          rule.right.style.right = x + "px";
+          if (options.frozenColumn != -1) {
+            frozenColumnCalc(canvasWidth, theColumns, canvasWidthR, canvasWidthL, x, w, i, rule);
+          } else {
+            simpleColumnCalc(canvasWidth, w, x, i, theColumns, rule);
+          }
         } else {
-          rule.left.style.left = x + "px";
-          rule.right.style.right = (((options.frozenColumn != -1 && i > options.frozenColumn) ? canvasWidthR : canvasWidthL) - x - w) + "px";
+          if (options.frozenColumn != -1) {
+            frozenColumnCalc(canvasWidth, theColumns, canvasWidthR, canvasWidthL, x, w, i, rule);
+          } else {
+            simpleColumnCalc(canvasWidth, w, x, i, theColumns, rule);
+          }
         }
-
 
         var frozenColumn = isRTL() ? theColumns.length - 1 - options.frozenColumn : options.frozenColumn;
         // If this column is frozen, reset the css left value since the
@@ -2027,6 +2034,58 @@
         } else {
           x += theColumns[i].width;
         }
+      }
+    }
+
+    function frozenColumnCalc(canvasWidth, theColumns, canvasWidthR, canvasWidthL, x, w, i, rule) {
+      if (isRTL()) {
+        var shouldUseRightWidth = (options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn));
+
+        var availableWidth = options.fullWidthRows ?
+          (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+          (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+
+        var leftWidth = (availableWidth - canvasWidthL) - (x + w);
+
+        rule.left.style.left = leftWidth + "px";
+        rule.right.style.right = x + "px";
+      } else {
+        var shouldUseRightWidth = (options.frozenColumn != -1 && i > options.frozenColumn);
+
+        var availableWidth = options.fullWidthRows ?
+          (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+          (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+
+        var rightWidth = (availableWidth - canvasWidthL) - (x + w);
+
+        rule.left.style.left = x + "px";
+        rule.right.style.right = rightWidth + "px";
+      }
+    }
+
+    function simpleColumnCalc(canvasWidth, w, x, i, theColumns, rule) {
+      if (isRTL()) {
+        var leftWidth = canvasWidth - (w + x);;
+        var rightWidth = x;
+
+        var totalWidth = theColumns.reduce((sum, column) => sum + column.width, 0);
+
+        if (i === 0 && totalWidth < canvasWidth) { // give the rest of the width to the first column.
+          leftWidth = 0;
+        }
+
+        rule.left.style.left = leftWidth + "px";
+        rule.right.style.right = rightWidth + "px";
+      } else {
+        var leftWidth = x;
+        var rightWidth = canvasWidth - (w + x);
+
+        if (i === theColumns.length - 1 && rightWidth > 0) { //give the rest of width to the last column.
+          rightWidth = 0;
+        }
+
+        rule.left.style.left = leftWidth + "px";
+        rule.right.style.right = rightWidth + "px";
       }
     }
 
