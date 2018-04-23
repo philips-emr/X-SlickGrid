@@ -102,7 +102,8 @@
       addNewRowCssClass: "new-row",
       doPaging: true,
       headerTopPanelGap: 0,
-      direction: 'ltr'
+      direction: 'ltr',
+      draggable: false
     };
 
     var columnDefaults = {
@@ -516,6 +517,13 @@
             .bind("dragend", handleDragEnd)
             .delegate(".slick-cell", "mouseenter", handleMouseEnter)
             .delegate(".slick-cell", "mouseleave", handleMouseLeave);
+
+        $canvas[0].addEventListener('dragstart', event => handleRowDragStart(event));
+        $canvas[0].addEventListener('drop', event => handleRowDrop(event));
+        $canvas[0].addEventListener('dragend', event => handleRowDragEnd(event));
+
+        const rowClass = '.slick-row';
+        $canvas.on('dragover', rowClass, handleRowDragOver);
 
         // Work around http://crbug.com/312427.
         if (navigator.userAgent.toLowerCase().match(/webkit/) &&
@@ -2491,10 +2499,11 @@
 
       var frozenRowOffset = getFrozenRowOffset(row);
 
-      var rowHtml = "<div class='ui-widget-content " + rowCss
-        + "' style='top:" + (getRowTop(row) - frozenRowOffset ) + "px;"
-        + " height: " + getRowHeight(row) + "px;"
-        + "'>";
+      var rowHtml = `<div
+          ${options.draggable && `draggable='true'`}
+          class='ui-widget-content ${rowCss}'
+          style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;'
+        >`;
 
       stringArrayL.push(rowHtml);
 
@@ -3609,6 +3618,25 @@
 
     function handleDragEnd(e, dd) {
       trigger(self.onDragEnd, dd, e);
+    }
+
+    function handleRowDragStart(event) {
+      const row = getRowFromNode(event.target);
+      trigger(self.onRowDragStart, { event, row });
+    }
+
+    function handleRowDragOver(event) {
+      const cell = getCellFromEvent(event);
+      trigger(self.onRowDragOver, { cell, event });
+    }
+
+    function handleRowDrop(event) {
+      const cell = getCellFromEvent(event);
+      trigger(self.onRowDrop, { cell, event });
+    }
+
+    function handleRowDragEnd(event) {
+      trigger(self.onDragEnd, { event });
     }
 
     function handleKeyDown(e) {
@@ -4784,6 +4812,16 @@
       options.rowHeights = heights;
     }
 
+    function setDraggable(draggable) {
+      options.draggable = draggable;
+
+      // we have to mannualy set the draggable property on already rendered rows, as calling
+      // render() only removes rows outisde the viewport and render them again.
+      const rows = $container[0].querySelectorAll('.slick-row');
+
+      rows.forEach(row => row.setAttribute('draggable', options.draggable));
+    }
+
     function isRTL() {
       return options.direction === 'rtl';
     }
@@ -4854,6 +4892,10 @@
       "onDragEnd": new Slick.Event(),
       "onSelectedRowsChanged": new Slick.Event(),
       "onCellCssStylesChanged": new Slick.Event(),
+      "onRowDragStart": new Slick.Event(),
+      "onRowDragOver": new Slick.Event(),
+      "onRowDrop": new Slick.Event(),
+      "onRowDragEnd": new Slick.Event(),
 
       // Methods
       "registerPlugin": registerPlugin,
@@ -4878,6 +4920,7 @@
       "setSelectedRows": setSelectedRows,
       "getContainerNode": getContainerNode,
       "setRowHeights": setRowHeights,
+      "setDraggable": setDraggable,
 
       "render": render,
       "invalidate": invalidate,
