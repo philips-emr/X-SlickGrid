@@ -3926,11 +3926,11 @@
     }
 
     function setFocus() {
-      if (tabbingDirection == -1) {
-        $focusSink[0].focus();
-      } else {
-        $focusSink2[0].focus();
-      }
+      // if (tabbingDirection == -1) {
+      //   $focusSink[0].focus();
+      // } else {
+      //   $focusSink2[0].focus();
+      // }
     }
 
     function scrollCellIntoView(row, cell, doPaging) {
