@@ -524,6 +524,7 @@
 
         const rowClass = '.slick-row';
         $canvas.on('dragover', rowClass, handleRowDragOver);
+        $canvas.on('dragover', handleCanvasDragOver);
 
         // Work around http://crbug.com/312427.
         if (navigator.userAgent.toLowerCase().match(/webkit/) &&
@@ -3626,8 +3627,15 @@
     }
 
     function handleRowDragOver(event) {
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
       const cell = getCellFromEvent(event);
       trigger(self.onRowDragOver, { cell, event });
+    }
+
+    function handleCanvasDragOver(event) {
+      trigger(self.onCanvasDragOver, { event });
     }
 
     function handleRowDrop(event) {
@@ -4896,6 +4904,7 @@
       "onRowDragOver": new Slick.Event(),
       "onRowDrop": new Slick.Event(),
       "onRowDragEnd": new Slick.Event(),
+      "onCanvasDragOver": new Slick.Event(),
 
       // Methods
       "registerPlugin": registerPlugin,
