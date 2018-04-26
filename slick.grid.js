@@ -2900,7 +2900,12 @@
         }
       }
 
-      th = Math.max(options.rowHeight * numberOfRows, tempViewportH - scrollbarDimensions.height);
+      const sumRowsHeight = (options.rowHeights || []).reduce((total, { height }) => total + height, 0);
+      const heightLeft = options.rowHeights && options.rowHeights.length ?
+        (numberOfRows - options.rowHeights.length) * options.rowHeight :
+        (numberOfRows * options.rowHeight);
+
+      th = Math.max(sumRowsHeight + heightLeft , tempViewportH - scrollbarDimensions.height);
 
       if (activeCellNode && activeRow > l) {
         resetActiveCell();
