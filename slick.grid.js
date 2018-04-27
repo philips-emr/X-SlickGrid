@@ -518,9 +518,12 @@
             .delegate(".slick-cell", "mouseenter", handleMouseEnter)
             .delegate(".slick-cell", "mouseleave", handleMouseLeave);
 
-        $canvas[0].addEventListener('dragstart', event => handleRowDragStart(event));
-        $canvas[0].addEventListener('drop', event => handleRowDrop(event));
-        $canvas[0].addEventListener('dragend', event => handleRowDragEnd(event));
+        $canvas.each((index, canvas) => {
+          canvas.addEventListener('dragstart', event => handleRowDragStart(event));
+          canvas.addEventListener('drop', event => handleRowDrop(event));
+          canvas.addEventListener('dragend', event => handleRowDragEnd(event));
+        });
+
 
         const rowClass = '.slick-row';
         $canvas.on('dragover', rowClass, handleRowDragOver);
