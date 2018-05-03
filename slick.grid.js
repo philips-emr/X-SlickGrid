@@ -2076,19 +2076,11 @@
 
         var totalWidth = theColumns.reduce((sum, column) => sum + column.width, 0);
 
-        if (i === 0 && totalWidth < canvasWidth) { // give the rest of the width to the first column.
-          leftWidth = 0;
-        }
-
         rule.left.style.left = leftWidth + "px";
         rule.right.style.right = rightWidth + "px";
       } else {
         var leftWidth = x;
         var rightWidth = canvasWidth - (w + x);
-
-        if (i === theColumns.length - 1 && rightWidth > 0) { //give the rest of width to the last column.
-          rightWidth = 0;
-        }
 
         rule.left.style.left = leftWidth + "px";
         rule.right.style.right = rightWidth + "px";
