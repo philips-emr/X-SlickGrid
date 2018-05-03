@@ -2903,12 +2903,10 @@
         }
       }
 
-      const sumRowsHeight = (options.rowHeights || []).reduce((total, { height }) => total + height, 0);
-      const heightLeft = options.rowHeights && options.rowHeights.length ?
-        (numberOfRows - options.rowHeights.length) * options.rowHeight :
-        (numberOfRows * options.rowHeight);
+      const totalRowsHeight = data.map(row => row._rowHeight || options.rowHeight)
+        .reduce((total, height) => total + height, 0);
 
-      th = Math.max(sumRowsHeight + heightLeft , tempViewportH - scrollbarDimensions.height);
+      th = Math.max(totalRowsHeight, tempViewportH - scrollbarDimensions.height);
 
       if (activeCellNode && activeRow > l) {
         resetActiveCell();
