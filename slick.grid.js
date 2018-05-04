@@ -2076,19 +2076,11 @@
 
         var totalWidth = theColumns.reduce((sum, column) => sum + column.width, 0);
 
-        if (i === 0 && totalWidth < canvasWidth) { // give the rest of the width to the first column.
-          leftWidth = 0;
-        }
-
         rule.left.style.left = leftWidth + "px";
         rule.right.style.right = rightWidth + "px";
       } else {
         var leftWidth = x;
         var rightWidth = canvasWidth - (w + x);
-
-        if (i === theColumns.length - 1 && rightWidth > 0) { //give the rest of width to the last column.
-          rightWidth = 0;
-        }
 
         rule.left.style.left = leftWidth + "px";
         rule.right.style.right = rightWidth + "px";
@@ -2903,12 +2895,10 @@
         }
       }
 
-      const sumRowsHeight = (options.rowHeights || []).reduce((total, { height }) => total + height, 0);
-      const heightLeft = options.rowHeights && options.rowHeights.length ?
-        (numberOfRows - options.rowHeights.length) * options.rowHeight :
-        (numberOfRows * options.rowHeight);
+      const totalRowsHeight = data.map(row => row._rowHeight || options.rowHeight)
+        .reduce((total, height) => total + height, 0);
 
-      th = Math.max(sumRowsHeight + heightLeft , tempViewportH - scrollbarDimensions.height);
+      th = Math.max(totalRowsHeight, tempViewportH - scrollbarDimensions.height);
 
       if (activeCellNode && activeRow > l) {
         resetActiveCell();
