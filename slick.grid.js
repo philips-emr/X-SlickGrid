@@ -516,7 +516,9 @@
             .bind("drag", handleDrag)
             .bind("dragend", handleDragEnd)
             .delegate(".slick-cell", "mouseenter", handleMouseEnter)
-            .delegate(".slick-cell", "mouseleave", handleMouseLeave);
+            .delegate(".slick-cell", "mouseleave", handleMouseLeave)
+            .delegate(".slick-row", "mouseenter", handleMouseEnterRow)
+            .delegate(".slick-row", "mouseleave", handleMouseLeaveRow);
 
         $canvas.each((index, canvas) => {
           canvas.addEventListener('dragstart', event => handleRowDragStart(event));
@@ -3709,21 +3711,27 @@
     }
 
     function handleClick(e) {
+      const SLICK_ROW = 'slick-row';
+      const SLICK_CELL = 'slick-cell';
+
       if (!currentEditor) {
         // if this click resulted in some cell child node getting focus,
         // don't steal it back - keyboard events will still bubble up
         // IE9+ seems to default DIVs to tabIndex=0 instead of -1, so check for cell clicks directly.
-        if (e.target != document.activeElement || $(e.target).hasClass("slick-cell")) {
+        if (e.target != document.activeElement || $(e.target).hasClass(SLICK_CELL) || $(e.target).hasClass(SLICK_ROW) ) {
           setFocus();
         }
       }
 
-      var cell = getCellFromEvent(e);
+      const cell = $(e.target).hasClass(SLICK_ROW) ?
+        { cell: 0, row: getRowFromNode(e.target) } :
+        getCellFromEvent(e);
+
       if (!cell || (currentEditor !== null && activeRow == cell.row && activeCell == cell.cell)) {
         return;
       }
 
-      trigger(self.onClick, {row: cell.row, cell: cell.cell}, e);
+      trigger(self.onClick, { row: cell.row, cell: cell.cell }, e);
       if (e.isImmediatePropagationStopped()) {
         return;
       }
@@ -3800,10 +3808,21 @@
 
     function handleMouseEnter(e) {
       trigger(self.onMouseEnter, {}, e);
+
+      e.stopPropagation();
     }
 
     function handleMouseLeave(e) {
       trigger(self.onMouseLeave, {}, e);
+    }
+
+    function handleMouseEnterRow(e) {
+      const row = getRowFromNode(event.target);
+      trigger(self.onMouseEnterRow, { row }, e);
+    }
+
+    function handleMouseLeaveRow(e) {
+      trigger(self.onMouseLeaveRow, {}, e);
     }
 
     function cellExists(row, cell) {
@@ -4877,6 +4896,8 @@
       "onBeforeFooterRowCellDestroy": new Slick.Event(),
       "onMouseEnter": new Slick.Event(),
       "onMouseLeave": new Slick.Event(),
+      "onMouseEnterRow": new Slick.Event(),
+      "onMouseLeaveRow": new Slick.Event(),
       "onClick": new Slick.Event(),
       "onDblClick": new Slick.Event(),
       "onContextMenu": new Slick.Event(),
