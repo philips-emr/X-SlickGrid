@@ -1495,19 +1495,20 @@
             var actualMinWidth, d = (isRTL() ? pageX - Math.min(maxPageX, Math.max(minPageX, e.pageX)) : Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX), x;
 
             function shouldShrink(column, element, pageX) {
-              if (!column) return;
+              if (!column || !element) return;
 
               const { resizable, minWidth } = column;
-              const actualMinWidth = Math.max(minWidth || 0 , absoluteColumnMinWidth);
+              const actualMinWidth = Math.max(minWidth || 0, absoluteColumnMinWidth);
 
               const rect = element.getBoundingClientRect();
 
+              $container;
               if (!resizable) return false;
 
               return pageX > rect.x + actualMinWidth
             }
 
-            function shouldStretch (column) {
+            function shouldStretch(column) {
               if (!column) return;
 
               const { resizable } = column;
@@ -1519,9 +1520,18 @@
             function moveRuler(left) {
               if (!$resizeRuler) return;
 
+              const relativeWidth = 40;
               $resizeRuler.css({
-                left: `${left}px`
+                left: `${left + relativeWidth}px`
               });
+            }
+
+            function getRelativePosition(event) {
+              var bounds = $container[0].getBoundingClientRect();
+              var x = event.pageX - bounds.left;
+              var y = event.pageY - bounds.top;
+
+              return { x, y };
             }
 
             const optionsWidth = 20;
@@ -1538,7 +1548,8 @@
 
                 applyDataToRuler(undefined, x);
 
-                const left = e.pageX - 4 - (optionsWidth * 2);
+                const { x: pageX } = getRelativePosition(event);
+                const left = pageX - (optionsWidth * 2);
                 moveRuler(left);
               }
 
@@ -1595,7 +1606,8 @@
 
                 applyDataToRuler(undefined, x);
 
-                const left = e.pageX - 4 - (optionsWidth * 2);
+                const { x: pageX } = getRelativePosition(event);
+                const left = pageX - (optionsWidth * 2);
                 moveRuler(left);
               }
 
