@@ -1502,7 +1502,6 @@
 
               const rect = element.getBoundingClientRect();
 
-              $container;
               if (!resizable) return false;
 
               return pageX > rect.x + actualMinWidth
