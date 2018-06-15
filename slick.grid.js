@@ -1519,9 +1519,8 @@
             function moveRuler(left) {
               if (!$resizeRuler) return;
 
-              const relativeWidth = 40;
               $resizeRuler.css({
-                left: `${left + relativeWidth}px`
+                left: `${left}px`
               });
             }
 
@@ -1533,7 +1532,6 @@
               return { x, y };
             }
 
-            const optionsWidth = 20;
             if (d < 0) { // shrink column
               x = d;
 
@@ -1548,7 +1546,7 @@
                 applyDataToRuler(undefined, x);
 
                 const { x: pageX } = getRelativePosition(event);
-                const left = pageX - (optionsWidth * 2);
+                const left = pageX;
                 moveRuler(left);
               }
 
@@ -1606,7 +1604,7 @@
                 applyDataToRuler(undefined, x);
 
                 const { x: pageX } = getRelativePosition(event);
-                const left = pageX - (optionsWidth * 2);
+                const left = pageX;
                 moveRuler(left);
               }
 
