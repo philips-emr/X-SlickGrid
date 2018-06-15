@@ -1363,7 +1363,46 @@
     }
 
     function setupColumnResize() {
-      var $col, j, k, c, pageX, columnElements, minPageX, maxPageX, firstResizable, lastResizable;
+      var $col, j, k, c, pageX, columnElements, minPageX, maxPageX, firstResizable, lastResizable, $resizeRuler;
+
+      function createRuler() {
+        const element = document.createElement('div');
+
+        const styles = {
+          position: 'absolute',
+          fontSize: '0.1px',
+          display: 'block',
+          width: '4px',
+          top: 0,
+          bottom: 0,
+          zIndex: '1',
+          borderRight: '1px solid silver',
+          cursor: 'col-resize'
+        };
+
+        Object.keys(styles).map(key => element.style[key] = styles[key]);
+
+        return element;
+      }
+
+      function getColumnFromEvent(event) {
+        const element = event.target.classList.contains('slick-header-column') ? event.target : event.target.parentElement;
+        const column = $(element).data('column');
+
+        return { element, column };
+      }
+
+      function getColumnFromRuler(ruler) {
+        return ruler.data('column');
+      }
+
+      function applyDataToRuler(column, columnWidth) {
+        if (!$resizeRuler) return;
+
+        column && $resizeRuler.data('column', column);
+        columnWidth && $resizeRuler.data('columnWidth', columnWidth)
+      }
+
       columnElements = $headers.children();
       columnElements.find(".slick-resizable-handle").remove();
       columnElements.each(function (i, e) {
@@ -1442,26 +1481,73 @@
             }
             maxPageX = pageX + Math.min(shrinkLeewayOnRight, stretchLeewayOnLeft);
             minPageX = pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight);
+
+            if (!$resizeRuler) {
+              $resizeRuler = $(createRuler());
+
+              $container.append($resizeRuler);
+
+              const { column: col } = getColumnFromEvent(e);
+              applyDataToRuler(col);
+            }
           })
           .bind("drag", function (e, dd) {
             var actualMinWidth, d = (isRTL() ? pageX - Math.min(maxPageX, Math.max(minPageX, e.pageX)) : Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX), x;
+
+            function shouldShrink(column, element, pageX) {
+              if (!column || !element) return;
+
+              const { resizable, minWidth } = column;
+              const actualMinWidth = Math.max(minWidth || 0, absoluteColumnMinWidth);
+
+              const rect = element.getBoundingClientRect();
+
+              if (!resizable) return false;
+
+              return pageX > rect.x + actualMinWidth
+            }
+
+            function shouldStretch(column) {
+              if (!column) return;
+
+              const { resizable } = column;
+
+              if (!resizable) return false;
+              return true;
+            }
+
+            function moveRuler(left) {
+              if (!$resizeRuler) return;
+
+              $resizeRuler.css({
+                left: `${left}px`
+              });
+            }
+
+            function getRelativePosition(event) {
+              var bounds = $container[0].getBoundingClientRect();
+              var x = event.pageX - bounds.left;
+              var y = event.pageY - bounds.top;
+
+              return { x, y };
+            }
+
             if (d < 0) { // shrink column
               x = d;
 
               var newCanvasWidthL = 0, newCanvasWidthR = 0;
 
-              for (j = i; j >= 0; j--) {
-                c = columns[j];
-                if (c.resizable) {
-                  actualMinWidth = Math.max(c.minWidth || 0, absoluteColumnMinWidth);
-                  if (x && c.previousWidth + x < actualMinWidth) {
-                    x += c.previousWidth - actualMinWidth;
-                    c.width = actualMinWidth;
-                  } else {
-                    c.width = c.previousWidth + x;
-                    x = 0;
-                  }
-                }
+              const { element } = getColumnFromEvent(e);
+              const col = getColumnFromRuler($resizeRuler);
+
+              if (shouldShrink(col, element, e.pageX)) {
+                x += col.previousWidth;
+
+                applyDataToRuler(undefined, x);
+
+                const { x: pageX } = getRelativePosition(event);
+                const left = pageX;
+                moveRuler(left);
               }
 
               for (k = 0; k <= i; k++) {
@@ -1510,17 +1596,16 @@
 
               var newCanvasWidthL = 0, newCanvasWidthR = 0;
 
-              for (j = i; j >= 0; j--) {
-                c = columns[j];
-                if (c.resizable) {
-                  if (x && c.maxWidth && (c.maxWidth - c.previousWidth < x)) {
-                    x -= c.maxWidth - c.previousWidth;
-                    c.width = c.maxWidth;
-                  } else {
-                    c.width = c.previousWidth + x;
-                    x = 0;
-                  }
-                }
+              const col = getColumnFromRuler($resizeRuler);
+
+              if (shouldStretch(col)) {
+                x += col.previousWidth;
+
+                applyDataToRuler(undefined, x);
+
+                const { x: pageX } = getRelativePosition(event);
+                const left = pageX;
+                moveRuler(left);
               }
 
               for (k = 0; k <= i; k++) {
@@ -1572,24 +1657,33 @@
               $paneHeaderR.css('left', newCanvasWidthL);
             }
 
-            applyColumnHeaderWidths();
-            applyColumnGroupHeaderWidths();
+            // applyColumnHeaderWidths();
+            // applyColumnGroupHeaderWidths();
             if (options.syncColumnCellResize) {
 //              updateCanvasWidth()
               applyColumnWidths();
             }
           })
           .bind("dragend", function (e, dd) {
-            var newWidth;
+            if ($resizeRuler) {
+              const column = $resizeRuler.data('column');
+              const columnWidth = $resizeRuler.data('columnWidth');
+
+              column && (column.width = columnWidth);
+              $resizeRuler.remove();
+            }
+
+
             $(this).parent().removeClass("slick-header-column-active");
             for (j = 0; j < columnElements.length; j++) {
               c = columns[j];
-              newWidth = $(columnElements[j]).outerWidth();
+              const newWidth = $(columnElements[j]).outerWidth();
 
               if (c.previousWidth !== newWidth && c.rerenderOnResize) {
                 invalidateAllRows();
               }
             }
+
             updateCanvasWidth(true);
             render();
             trigger(self.onColumnsResized, {});
