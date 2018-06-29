@@ -1257,6 +1257,7 @@
     function setupColumnReorder() {
       if (!options.enableColumnReorder) return;
 
+      let cloneElement;
       let scrollInterval;
 
       function getRelativePosition(container, event) {
@@ -1268,7 +1269,8 @@
       }
 
       function cleanup(clone) {
-        clone.remove();
+        cloneElement && cloneElement.remove();
+        cloneElement = null;
 
         document.onmouseup = null;
         document.onmousedown = null;
@@ -1322,11 +1324,11 @@
         return copy;
       }
 
-      function onDragFinish(column, clone) {
+      function onDragFinish(column, clone, container) {
         clearInterval(scrollInterval);
 
         const { x, y } = clone.getBoundingClientRect();
-        cleanup(clone, container);
+        cleanup(undefined, container);
 
         const targetElement = getTargetElement(x, y);
 
@@ -1394,8 +1396,15 @@
       }
 
       const onmousedown = (event, column, container) => {
+        document.onmouseup = () => {
+          cleanup(undefined, container);
+        };
+
+        $container[0].onmousemove = event => dragElement(event, container, column)
+      };
+
+      const createClone = (column) => {
         const clone = column.cloneNode(true);
-        container.append(clone);
 
         const { x } = column.getBoundingClientRect();
 
@@ -1408,16 +1417,21 @@
 
         Object.keys(styles).forEach(key => clone.style[key] = styles[key]);
 
-        document.onmouseup = () => {
-          onDragFinish(column, clone);
-        };
-
-        $container[0].onmousemove = event => dragElement(event, clone, container)
+        return clone;
       };
 
-      const dragElement = (event, element, container) => {
-        moveCloneElement(event, container, element);
-        verifyScroll(event, element, container);
+      const dragElement = (event, container, column) => {
+        if (!cloneElement) {
+          cloneElement = createClone(column);
+          container.append(cloneElement);
+        }
+
+        document.onmouseup = () => {
+          onDragFinish(column, cloneElement, container);
+        };
+
+        moveCloneElement(event, container, cloneElement);
+        verifyScroll(event, cloneElement, container);
       };
 
       const applyReorderToHeader = header => {
