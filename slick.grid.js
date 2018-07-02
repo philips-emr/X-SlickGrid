@@ -1304,14 +1304,14 @@
         const targetColumn = $(columnElement).data('column');
 
         if (!targetColumn) {
-          return [...columns];
+          return columns.slice();
         }
 
         if (originColumn.id === targetColumn.id) {
-          return [...columns];
+          return columns.slice();
         }
 
-        const copy = [...columns].filter(column => column.id !== originColumn.id);
+        const copy = columns.slice().filter(column => column.id !== originColumn.id);
         const targetIndex = copy.findIndex(column => column.id === targetColumn.id);
 
         if (previous) {
