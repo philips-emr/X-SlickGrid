@@ -1346,8 +1346,7 @@
       function verifyScroll(event, element, container) {
         const LIMIT = 30;
         const { pageX } = event;
-        const parent = container.parentElement;
-        const { left, right } = parent.getBoundingClientRect();
+        const { left, right } = container.parentElement.getBoundingClientRect();
 
         if (pageX <= (left + LIMIT)) {
           return scrollToLeft(event, element, container);
