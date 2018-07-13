@@ -2696,6 +2696,7 @@
       var rowHtml = `<div
           ${options.draggable && `draggable='true'`}
           class='ui-widget-content ${rowCss}'
+          data-row-idx='${row}'
           style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;'
         >`;
 
