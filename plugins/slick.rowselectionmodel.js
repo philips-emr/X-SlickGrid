@@ -84,13 +84,13 @@
       return rangesToRows(_ranges);
     }
 
-    function setSelectedRows(rows) {
-      setSelectedRanges(rowsToRanges(rows));
+    function setSelectedRows(rows, e) {
+      setSelectedRanges(rowsToRanges(rows), e);
     }
 
-    function setSelectedRanges(ranges) {
+    function setSelectedRanges(ranges, e) {
       _ranges = ranges;
-      _self.onSelectedRangesChanged.notify(_ranges);
+      _self.onSelectedRangesChanged.notify(_ranges, e);
     }
 
     function getSelectedRanges() {
