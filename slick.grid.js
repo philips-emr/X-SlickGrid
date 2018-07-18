@@ -5020,11 +5020,11 @@
       return selectedRows;
     }
 
-    function setSelectedRows(rows) {
+    function setSelectedRows(rows, e) {
       if (!selectionModel) {
         throw "Selection model is not set";
       }
-      selectionModel.setSelectedRanges(rowsToRanges(rows));
+      selectionModel.setSelectedRanges(rowsToRanges(rows), e);
     }
 
     function setRowHeights(heights) {
