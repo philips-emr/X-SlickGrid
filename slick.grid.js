@@ -1394,12 +1394,17 @@
         $(element).css({ left: `${x}px` });
       }
 
-      const onmousedown = (event, column, container) => {
-        document.onmouseup = () => {
-          cleanup(undefined, container);
-        };
+      const onmousedown = (mdEvent, column, container) => {
+        document.onmouseup = () => cleanup(undefined, container);
 
-        $container[0].onmousemove = event => dragElement(event, container, column)
+        $container[0].onmousemove = mmEvent => {
+          if (!hasMouseMoved(mdEvent, mmEvent)) return;
+          dragElement(event, container, column);
+        }
+      };
+
+      const hasMouseMoved = (evtA, evtB) => {
+        return evtA.clientX !== evtB.clientX || evtA.clientY !== evtB.clientY;
       };
 
       const createClone = (column) => {
