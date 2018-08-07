@@ -1278,18 +1278,9 @@
       }
 
       function getTargetElement(x, y) {
-        const element = document.elementFromPoint(x, y);
+        const elements = document.elementsFromPoint(x, y);
 
-        if (!element) return;
-
-        if (element.classList.contains('slick-header-column')) {
-          return element;
-        }
-
-        // if not, the element can be one of:
-        // resizeable handler, menu buttom, sort indicator, column name.
-
-        return element.parentElement;
+        return elements.find(element => element.classList.contains('slick-header-column'));
       }
 
       function isPrevious(element, cloneX) {
@@ -1328,13 +1319,17 @@
         clearInterval(scrollInterval);
 
         const { x, y } = clone.getBoundingClientRect();
+
+        const ceiledX = Math.ceil(x);
+        const ceiledY = Math.ceil(y);
+
         cleanup(undefined, container);
 
-        const targetElement = getTargetElement(x, y);
+        const targetElement = getTargetElement(ceiledX, ceiledY);
 
         if (!targetElement) return;
 
-        const previous = isPrevious(targetElement, x);
+        const previous = isPrevious(targetElement, ceiledX);
         const orderedColumns = getOrderedColumns(column, targetElement, previous);
 
         setColumns(orderedColumns);
