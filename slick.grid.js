@@ -4474,16 +4474,21 @@
 	  	  ( !options.frozenBottom && row > actualFrozenRow - 1 ) ||
 	  	  ( options.frozenBottom && row < actualFrozenRow - 1 ) ) {
 
+        var viewportScrollH = $viewportScrollContainerY.height();
+
 	      // if frozen row on top
 	      // subtract number of frozen row
 	      var rowNumber = ( hasFrozenRows && !options.frozenBottom ? row - options.frozenRow : row );
 
 	      var rowAtTop = rowNumber * options.rowHeight;
 
-        // By default we want to always scroll to the row making it visible at the top.
-        // No need to check if going up or down anymore
-        scrollTo(rowAtTop);
-        render();
+        if ((rowNumber + 1) * options.rowHeight > scrollTop + viewportScrollH + offset
+          || rowNumber * options.rowHeight < scrollTop + offset) {
+          // By default we want to always scroll to the row making it visible at the top.
+          // No need to check if going up or down anymore
+          scrollTo(rowAtTop);
+          render();
+        }
 	    }
     }
 
