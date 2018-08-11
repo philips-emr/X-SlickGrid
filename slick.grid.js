@@ -4475,27 +4475,32 @@
 	  	  ( !options.frozenBottom && row > actualFrozenRow - 1 ) ||
 	  	  ( options.frozenBottom && row < actualFrozenRow - 1 ) ) {
 
-	      var viewportScrollH = $viewportScrollContainerY.height();
+	      // var viewportScrollH = $viewportScrollContainerY.height();
 
 	      // if frozen row on top
 	      // subtract number of frozen row
 	      var rowNumber = ( hasFrozenRows && !options.frozenBottom ? row - options.frozenRow : row );
 
 	      var rowAtTop = rowNumber * options.rowHeight;
-	      var rowAtBottom = (rowNumber + 1) * options.rowHeight
-	        - viewportScrollH
-	        + (viewportHasHScroll ? scrollbarDimensions.height : 0);
+	      // var rowAtBottom = (rowNumber + 1) * options.rowHeight
+	      //   - viewportScrollH
+	      //   + (viewportHasHScroll ? scrollbarDimensions.height : 0);
 
-	      // need to page down?
-	      if ((rowNumber + 1) * options.rowHeight > scrollTop + viewportScrollH + offset) {
-	        scrollTo(doPaging ? rowAtTop : rowAtBottom);
-	        render();
-	      }
-	      // or page up?
-	      else if (rowNumber * options.rowHeight < scrollTop + offset) {
-	        scrollTo(doPaging ? rowAtBottom : rowAtTop);
-	        render();
-	      }
+	      // // need to page down?
+	      // if ((rowNumber + 1) * options.rowHeight > scrollTop + viewportScrollH + offset) {
+	      //   scrollTo(doPaging ? rowAtTop : rowAtBottom);
+	      //   render();
+	      // }
+	      // // or page up?
+	      // else if (rowNumber * options.rowHeight < scrollTop + offset) {
+	      //   scrollTo(doPaging ? rowAtBottom : rowAtTop);
+	      //   render();
+        // }
+
+        // By default we want to always scroll to the row making it visible at the top.
+        // No need to check if going up or down anymore
+        scrollTo(rowAtTop);
+        render();
 	    }
     }
 
