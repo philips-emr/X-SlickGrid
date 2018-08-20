@@ -3199,10 +3199,12 @@
     }
 
     function ensureCellNodesInRowsCache(row) {
+      // Avoid getting any class non maintaned by slickgrid.
+      const SLICK_CELL = ".slick-cell";
       var cacheEntry = rowsCache[row];
       if (cacheEntry) {
         if (cacheEntry.cellRenderQueue.length) {
-          var $lastNode = cacheEntry.rowNode.children().last();
+          var $lastNode = cacheEntry.rowNode.find(SLICK_CELL).last()
           while (cacheEntry.cellRenderQueue.length) {
             var columnIdx = cacheEntry.cellRenderQueue.pop();
 
@@ -3211,7 +3213,7 @@
 
             // Hack to retrieve the frozen columns because
             if ($lastNode.length == 0) {
-              $lastNode = $(cacheEntry.rowNode[0]).children().last();
+              $lastNode = $(cacheEntry.rowNode[0]).find(SLICK_CELL).last();
             }
           }
         }
