@@ -3204,7 +3204,7 @@
       var cacheEntry = rowsCache[row];
       if (cacheEntry) {
         if (cacheEntry.cellRenderQueue.length) {
-          var $lastNode = cacheEntry.rowNode.find(SLICK_CELL).last()
+          var $lastNode = cacheEntry.rowNode.find(SLICK_CELL).last();
           while (cacheEntry.cellRenderQueue.length) {
             var columnIdx = cacheEntry.cellRenderQueue.pop();
 
