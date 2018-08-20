@@ -3199,10 +3199,12 @@
     }
 
     function ensureCellNodesInRowsCache(row) {
+      // Avoid getting row edition button as a column.
+      var EXCLUDE_CLASS = ".inline-edit-link";
       var cacheEntry = rowsCache[row];
       if (cacheEntry) {
         if (cacheEntry.cellRenderQueue.length) {
-          var $lastNode = cacheEntry.rowNode.children().last();
+          var $lastNode = cacheEntry.rowNode.children().not(EXCLUDE_CLASS).last();
           while (cacheEntry.cellRenderQueue.length) {
             var columnIdx = cacheEntry.cellRenderQueue.pop();
 
@@ -3211,7 +3213,7 @@
 
             // Hack to retrieve the frozen columns because
             if ($lastNode.length == 0) {
-              $lastNode = $(cacheEntry.rowNode[0]).children().last();
+              $lastNode = $(cacheEntry.rowNode[0]).children().not(EXCLUDE_CLASS).last();
             }
           }
         }
