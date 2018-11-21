@@ -78,6 +78,7 @@
       enableAsyncPostRender: false,
       asyncPostRenderDelay: 50,
       autoHeight: false,
+      hasScrollBar: true,
       editorLock: Slick.GlobalEditorLock,
       showHeaderRow: false,
       headerRowHeight: 25,
@@ -3082,7 +3083,7 @@
       var tempViewportH = $viewportScrollContainerY.height();
       var oldViewportHasVScroll = viewportHasVScroll;
       // with autoHeight, we do not need to accommodate the vertical scroll bar
-      viewportHasVScroll = !options.autoHeight && (numberOfRows * options.rowHeight > tempViewportH);
+      viewportHasVScroll = (!options.autoHeight && options.hasScrollBar) && (numberOfRows * options.rowHeight > tempViewportH);
 
       makeActiveCellNormal();
 
