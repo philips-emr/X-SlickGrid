@@ -1394,7 +1394,7 @@
         document.onmouseup = () => cleanup(undefined, container);
 
         $container[0].onmousemove = mmEvent => {
-          if (!hasMouseMoved(mdEvent, mmEvent)) return;
+          if (!hasMouseMoved(mdEvent, mmEvent) || $(column).data().column.fixed) return;
           dragElement(event, container, column);
         }
       };
