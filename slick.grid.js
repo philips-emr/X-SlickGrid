@@ -1391,6 +1391,8 @@
       }
 
       const onmousedown = (mdEvent, column, container) => {
+        if (mdEvent.toElement.hasAttribute('resize-col-div')) return;
+
         document.onmouseup = () => cleanup(undefined, container);
 
         $container[0].onmousemove = mmEvent => {
@@ -1525,8 +1527,9 @@
           return;
         }
         $col = $(e);
-        $("<div class='slick-resizable-handle' />")
+        $("<div resize-col-div class='slick-resizable-handle' />")
           .appendTo(e)
+          .draggable({ cursor: "col-resize" })
           .bind("dragstart", function (e, dd) {
             if (!getEditorLock().commitCurrentEdit()) {
               return false;
@@ -1768,7 +1771,7 @@
               applyColumnWidths();
             }
           })
-          .bind("dragend", function (e, dd) {
+          .bind("dragstop", function (e, dd) {
             if ($resizeRuler) {
               const column = $resizeRuler.data('column');
               const columnWidth = $resizeRuler.data('columnWidth');
