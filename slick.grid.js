@@ -2699,7 +2699,7 @@
       var frozenRowOffset = getFrozenRowOffset(row);
 
       var rowHtml = `<div
-          ${options.draggable && `draggable='true'`}
+          ${options.draggable && `draggable='true' data-draggable-row`}
           class='ui-widget-content ${rowCss}'
           data-row-idx='${row}'
           style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;'
@@ -3804,6 +3804,8 @@
     }
 
     function handleDragStart(e, dd) {
+      if (e.target.hasAttribute('data-draggable-row')) return true;
+
       var cell = getCellFromEvent(e);
       if (!cell || !cellExists(cell.row, cell.cell)) {
         return false;
@@ -3822,6 +3824,7 @@
     }
 
     function handleDragEnd(e, dd) {
+      if (e.target.hasAttribute('data-draggable-row')) return;
       trigger(self.onDragEnd, dd, e);
     }
 
