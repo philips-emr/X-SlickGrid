@@ -2434,7 +2434,7 @@
         resizeCanvas();
         updateCanvasWidth();
         applyColumnWidths();
-        handleScroll();
+        handleScroll(false);
       }
     }
 
@@ -3064,7 +3064,7 @@
       }
 
       updateRowCount();
-      handleScroll();
+      handleScroll(false);
       // Since the width has changed, force the render() to reevaluate virtually rendered cells.
       lastRenderedScrollLeft = -1;
       render();
@@ -3557,10 +3557,16 @@
       if (handled) e.preventDefault();
     }
 
-    function handleScroll() {
+    function handleScroll(isScrollEvent = true) {
+      trigger(self.onBeforeHandleScroll, { isScrollEvent: isScrollEvent });
+
       scrollTop = $viewportScrollContainerY[0].scrollTop;
       scrollLeft = $viewportScrollContainerX[0].scrollLeft;
-      return _handleScroll(false);
+      const result = _handleScroll(false);
+
+      trigger(self.onAfterHandleScroll, { isScrollEvent: isScrollEvent });
+
+      return result;
     }
 
     function _handleScroll(isMouseWheel) {
@@ -4180,11 +4186,11 @@
 
       if (left < scrollLeft) {
         $viewportScrollContainerX.scrollLeft(left);
-        handleScroll();
+        handleScroll(true);
         render();
       } else if (right > scrollRight) {
         $viewportScrollContainerX.scrollLeft(Math.min(left, right - $viewportScrollContainerX[0].clientWidth));
-        handleScroll();
+        handleScroll(true);
         render();
       }
     }
@@ -5124,6 +5130,8 @@
       "onRowDrop": new Slick.Event(),
       "onRowDragEnd": new Slick.Event(),
       "onCanvasDragOver": new Slick.Event(),
+      "onBeforeHandleScroll": new Slick.Event(),
+      "onAfterHandleScroll": new Slick.Event(),
 
       // Methods
       "registerPlugin": registerPlugin,
