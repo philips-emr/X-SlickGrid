@@ -2947,7 +2947,7 @@
           - footerRowH;
       }
 
-      numVisibleRows = Math.ceil(viewportH / options.rowHeight);
+      numVisibleRows = Math.trunc(viewportH / options.rowHeight);
     }
 
     function getViewportWidth() {
