@@ -3136,16 +3136,11 @@
         scrollTop = $viewportScrollContainerY[0].scrollTop;
       }
 
-      var oldScrollTopInRange = (scrollTop + offset <= th - tempViewportH);
-
       if (th == 0 || scrollTop == 0) {
         page = offset = 0;
-      } else if (oldScrollTopInRange) {
+      } else {
         // maintain virtual position
         scrollTo(scrollTop + offset);
-      } else {
-        // scroll to bottom
-        scrollTo(th - tempViewportH);
       }
 
       if (h != oldH && options.autoHeight) {
