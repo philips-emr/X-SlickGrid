@@ -3083,10 +3083,13 @@
         var numberOfRows = dataLengthIncludingAddNew + (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0);
       }
 
+      const totalRowsHeight = data.map(row => row._rowHeight || options.rowHeight)
+        .reduce((total, height) => total + height, 0);
+
       var tempViewportH = $viewportScrollContainerY.height();
       var oldViewportHasVScroll = viewportHasVScroll;
       // with autoHeight, we do not need to accommodate the vertical scroll bar
-      viewportHasVScroll = (!options.autoHeight && options.hasScrollBar) && (numberOfRows * options.rowHeight > tempViewportH);
+      viewportHasVScroll = (!options.autoHeight && options.hasScrollBar) && (totalRowsHeight > tempViewportH);
 
       makeActiveCellNormal();
 
@@ -3098,9 +3101,6 @@
           removeRowFromCache(i);
         }
       }
-
-      const totalRowsHeight = data.map(row => row._rowHeight || options.rowHeight)
-        .reduce((total, height) => total + height, 0);
 
       th = Math.max(totalRowsHeight, tempViewportH - scrollbarDimensions.height);
 
