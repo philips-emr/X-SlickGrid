@@ -4490,10 +4490,10 @@
 	      // subtract number of frozen row
 	      var rowNumber = ( hasFrozenRows && !options.frozenBottom ? row - options.frozenRow : row );
 
-	      var rowAtTop = rowNumber * options.rowHeight;
+	      var rowAtTop = getTotalHeightByRowId(rowNumber);
 
-        if ((rowNumber + 1) * options.rowHeight > scrollTop + viewportScrollH + offset
-          || rowNumber * options.rowHeight < scrollTop + offset) {
+        if (getTotalHeightByRowId(rowNumber + 1) > scrollTop + viewportScrollH + offset
+          || getTotalHeightByRowId(rowNumber) < scrollTop + offset) {
           // By default we want to always scroll to the row making it visible at the top.
           // No need to check if going up or down anymore
           scrollTo(rowAtTop);
@@ -4502,8 +4502,18 @@
 	    }
     }
 
+    function getTotalHeightByRowId(rowNumber) {
+      let totalHeight = 0;
+
+      for (let idx = 0; idx < rowNumber; idx++) {
+        totalHeight = totalHeight + getRowHeight(idx);
+      }
+
+      return totalHeight;
+    }
+
     function scrollRowToTop(row) {
-      scrollTo(row * options.rowHeight);
+      scrollTo(getTotalHeightByRowId(row));
       render();
     }
 
