@@ -2036,8 +2036,18 @@
       $container.empty().removeClass(uid);
     }
 
-    function getRowHeight(index) {
-      let rowHeight = options.rowHeights && options.rowHeights[index] && options.rowHeights[index].height;
+    function getRowHeight(index, isForNewRow) {
+      let rowHeight;
+      if (isForNewRow && options.getRowHeight != null && typeof options.getRowHeight === 'function') {
+        rowHeight = options.getRowHeight(index);
+        if (rowHeight) {
+          if (options.rowHeights && options.rowHeights[index]){
+            options.rowHeights[index].height = rowHeight;
+          }
+          return rowHeight;
+        }
+      }
+      rowHeight = options.rowHeights && options.rowHeights[index] && options.rowHeights[index].height;
       rowHeight = rowHeight || (data && data[index] && data[index]._rowHeight);
       return rowHeight || options.rowHeight;
     }
@@ -2702,7 +2712,7 @@
           ${options.draggable && `draggable='true' data-draggable-row`}
           class='ui-widget-content ${rowCss}'
           data-row-idx='${row}'
-          style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;'
+          style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row, true)}px;'
         >`;
 
       stringArrayL.push(rowHtml);
