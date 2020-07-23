@@ -3087,7 +3087,16 @@
       }
 
       const items = typeof data.getItems === 'function' ? data.getItems() : data;
-      const totalRowsHeight = items.map(row => row._rowHeight || options.rowHeight)
+      const groups = typeof data.getGroups === 'function' ? data.getGroups() : [];
+
+      const openGroups = groups.filter((group) => group.collapsed === 0);
+
+      const groupItems = openGroups.reduce((accumulator = [], group) => {
+        return accumulator.concat([{}, ...group.rows]);
+      }, []);
+
+      const rows = groupItems.length > 0 ? groupItems : items;
+      const totalRowsHeight = rows.map(row => row._rowHeight || options.rowHeight)
         .reduce((total, height) => total + height, 0);
 
       var tempViewportH = $viewportScrollContainerY.height();
