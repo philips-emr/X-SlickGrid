@@ -2037,8 +2037,11 @@
     }
 
     function getRowHeight(index) {
+      const items = typeof data.getItems === 'function' ? data.getItems() : data;
+
       let rowHeight = options.rowHeights && options.rowHeights[index] && options.rowHeights[index].height;
-      rowHeight = rowHeight || (data && data[index] && data[index]._rowHeight);
+      rowHeight = rowHeight || (items && items[index] && items[index]._rowHeight);
+
       return rowHeight || options.rowHeight;
     }
 
@@ -2564,7 +2567,7 @@
       let height = 0;
       let point = y + offset;
       let i = 0;
-      for (i = 0; i <= data.length; i++) {
+      for (i = 0; i <= getDataLength(); i++) {
         let rowHeight = getRowHeight(i);
         if (point >= height && point < height + rowHeight) {
           return i;
@@ -3083,7 +3086,17 @@
         var numberOfRows = dataLengthIncludingAddNew + (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0);
       }
 
-      const totalRowsHeight = data.map(row => row._rowHeight || options.rowHeight)
+      const items = typeof data.getItems === 'function' ? data.getItems() : data;
+      const groups = typeof data.getGroups === 'function' ? data.getGroups() : [];
+
+      const openGroups = groups.filter((group) => group.collapsed === 0);
+
+      const groupItems = openGroups.reduce((accumulator = [], group) => {
+        return accumulator.concat([{}, ...group.rows]);
+      }, []);
+
+      const rows = groupItems.length > 0 ? groupItems : items;
+      const totalRowsHeight = rows.map(row => row._rowHeight || options.rowHeight)
         .reduce((total, height) => total + height, 0);
 
       var tempViewportH = $viewportScrollContainerY.height();
