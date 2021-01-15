@@ -104,6 +104,10 @@
     }
 
     function handleKeyDown(e) {
+      if (!_grid.getOptions().multiSelect) {
+        return false;
+      }
+
       var activeRow = _grid.getActiveCell();
       if (activeRow && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey && (e.which == 38 || e.which == 40)) {
         var selectedRows = getSelectedRows();
