@@ -177,6 +177,9 @@
     var serializedEditorValue;
     var editController;
 
+    var currentRenderingRow = 0;
+    var rows = [];
+
     var rowsCache = {};
     var renderedRows = 0;
     var numVisibleRows = 0;
@@ -2679,15 +2682,23 @@
       }
       return item[columnDef.field];
     }
+    
 
     function appendRowHtml(stringArrayL, stringArrayR, row, range, dataLength) {
       var d = getDataItem(row);
+      appendRowHtmlData(stringArrayL, stringArrayR, row, range, dataLength, d);
+    }
+
+    function appendRowHtmlData(stringArrayL, stringArrayR, row, range, dataLength, d) {
+
+      var expandable = d.groupLineRow && d.groupLineRow.length > 0;
       var dataLoading = row < dataLength && !d;
       var rowCss = "slick-row" +
           (hasFrozenRows && row <= options.frozenRow? ' frozen': '') +
           (dataLoading ? " loading" : "") +
           (row === activeRow ? " active" : "") +
-          (row % 2 == 1 ? " odd" : " even");
+          (row % 2 == 1 ? " odd" : " even") +
+          (expandable ? " expandable" : "");
 
       if (!d) {
         rowCss += " " + options.addNewRowCssClass;
@@ -2784,6 +2795,12 @@
 
       // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
       if (item) {
+        var expandable = cell === 1 && item.expandable;
+
+        if (expandable) {
+          stringArray.push(`<span class="slick-row-expandable ${item.expanded ? "expanded" : "collapsed"}" style="margin-left:0px"></span>`);
+        }
+
         var value = getDataItemValueForColumn(item, m);
         stringArray.push(callFormatter(row, cell, value, m, item));
       }
@@ -3376,20 +3393,21 @@
     function renderRows(range) {
       var stringArrayL = [],
         stringArrayR = [],
-        rows = [],
         needToReselectCell = false,
         dataLength = getDataLength();
+      
+      rows = [];
 
-      for (var i = range.top, ii = range.bottom; i <= ii; i++) {
-        if (rowsCache[i] || ( hasFrozenRows && options.frozenBottom && i == getDataLength() )) {
+      for (currentRenderingRow = range.top, ii = range.bottom; currentRenderingRow <= ii; currentRenderingRow++) {
+        if (rowsCache[currentRenderingRow] || ( hasFrozenRows && options.frozenBottom && currentRenderingRow == getDataLength() )) {
           continue;
         }
         renderedRows++;
-        rows.push(i);
+        rows.push(currentRenderingRow);
 
         // Create an entry right away so that appendRowHtml() can
         // start populatating it.
-        rowsCache[i] = {
+        rowsCache[currentRenderingRow] = {
           "rowNode": null,
 
           // ColSpans of rendered cells (by column idx).
@@ -3405,8 +3423,8 @@
           "cellRenderQueue": []
         };
 
-        appendRowHtml(stringArrayL, stringArrayR, i, range, dataLength);
-        if (activeCellNode && activeRow === i) {
+        appendRowHtml(stringArrayL, stringArrayR, currentRenderingRow, range, dataLength);
+        if (activeCellNode && activeRow === currentRenderingRow) {
           needToReselectCell = true;
         }
         counter_rows_rendered++;
@@ -3951,6 +3969,8 @@
       if (!cell || (currentEditor !== null && activeRow == cell.row && activeCell == cell.cell)) {
         return;
       }
+
+      getData().expandCollapseRow(getData().getItem(cell.row));
 
       trigger(self.onClick, { row: cell.row, cell: cell.cell }, e);
       if (e.isImmediatePropagationStopped()) {

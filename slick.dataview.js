@@ -79,6 +79,8 @@
     var toggledGroupsByLevel = [];
     var groupingDelimiter = ':|:';
 
+    var rowExpandableInfos = [];
+
     var pagesize = 0;
     var pagenum = 0;
     var totalRows = 0;
@@ -259,6 +261,14 @@
         toggledGroupsByLevel[i] = {};
       }
 
+      refresh();
+    }
+
+    function setExpandableRows(groupingInfo) {
+      refresh();
+    }
+
+    function getExpandableRows() {
       refresh();
     }
 
@@ -483,6 +493,44 @@
     function expandGroup(varArgs) {
       var args = Array.prototype.slice.call(arguments);
       expandCollapseGroup(args, false);
+    }
+
+    function expandCollapseRow(row) {
+      if (!row || !row.expandable) {
+        return;
+      }
+
+      const rowId = row.id;
+
+      if (rowExpandableInfos.includes(rowId)) {
+        collapseRow(rowId);
+      } else {
+        expandRow(rowId);
+      }
+    }
+
+    function expandRow(id) {
+      //rowExpandableInfos[id] = true;
+      rowExpandableInfos.push(id);
+      refresh();
+    }
+
+    function collapseRow(id) {
+      //rowExpandableInfos[id] = false;
+      rowExpandableInfos = rowExpandableInfos.filter(e => e !== id)
+      refresh();
+    }
+
+    function expandAllRows() {
+      rowExpandableInfos = [];
+      refresh();
+    }
+
+    function collapseAllRows() {
+      //for (var a = 0; a < rowExpandableInfos.length; a++) {
+      //  rowExpandableInfos[a] = false;
+      //}
+      refresh();
     }
 
     function getGroups() {
@@ -844,6 +892,22 @@
         }
       }
 
+      if (rowExpandableInfos && rowExpandableInfos.length > 0) {
+        var newNewRows = [];
+        //rowExpandableInfos = [1212, 1313, 1414]
+
+        for (row of newRows) {
+          if (row.expandable || !rowExpandableInfos.includes(row.parentRow)) {
+            row.expanded = row.expandable && !rowExpandableInfos.includes(row.parentRow);
+            newNewRows.push(row);
+          }
+        }
+  
+        if (newNewRows.length > 0) {
+          newRows = newNewRows;
+        }
+      }
+
       var diff = getRowDiffs(rows, newRows);
 
       rows = newRows;
@@ -1023,12 +1087,19 @@
       "reSort": reSort,
       "setGrouping": setGrouping,
       "getGrouping": getGrouping,
+      "setExpandableRows": setExpandableRows,
+      "getExpandableRows": getExpandableRows,
       "groupBy": groupBy,
       "setAggregators": setAggregators,
       "collapseAllGroups": collapseAllGroups,
       "expandAllGroups": expandAllGroups,
       "collapseGroup": collapseGroup,
       "expandGroup": expandGroup,
+      "expandCollapseRow": expandCollapseRow,
+      "expandAllRows": expandAllRows,
+      "collapseAllRows": collapseAllRows,
+      "expandRow": expandRow,
+      "collapseRow": collapseRow,
       "getGroups": getGroups,
       "getIdxById": getIdxById,
       "getRowById": getRowById,
