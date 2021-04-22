@@ -2689,14 +2689,25 @@
           (row === activeRow ? " active" : "") +
           (row % 2 == 1 ? " odd" : " even");
 
+      var attr = "";
+
       if (!d) {
         rowCss += " " + options.addNewRowCssClass;
       }
 
       var metadata = data.getItemMetadata && data.getItemMetadata(row);
 
-      if (metadata && metadata.cssClasses) {
-        rowCss += " " + metadata.cssClasses;
+      if (metadata) {
+        if(metadata.cssClasses){
+          rowCss += " " + metadata.cssClasses;
+        }
+        if (metadata.customAttr){
+          for (var attribute in metadata.customAttr){
+            if (metadata.customAttr.hasOwnProperty(attribute)) {
+              attr += attribute + "='" + metadata.customAttr[attribute] + "' ";
+            }
+          }
+        }
       }
 
       var frozenRowOffset = getFrozenRowOffset(row);
@@ -2705,7 +2716,8 @@
           ${options.draggable && `draggable='true' data-draggable-row`}
           class='ui-widget-content ${rowCss}'
           data-row-idx='${row}'
-          style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;'
+          style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;' 
+          ${attr}
         >`;
 
       stringArrayL.push(rowHtml);
