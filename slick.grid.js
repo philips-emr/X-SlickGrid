@@ -2553,6 +2553,9 @@
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Rendering / Scrolling
+    function fixCurrentPage(page) {
+      return isNaN(page) ? 0 : page;
+    }
 
     function getRowTop(row) {
       let top = 0;
@@ -2583,7 +2586,7 @@
 
       var oldOffset = offset;
 
-      page = Math.min(n - 1, Math.floor(y / ph));
+      page = fixCurrentPage(Math.min(n - 1, Math.floor(y / ph)));
       offset = Math.round(page * cj);
       var newScrollTop = y - offset;
 
@@ -2716,7 +2719,7 @@
           ${options.draggable && `draggable='true' data-draggable-row`}
           class='ui-widget-content ${rowCss}'
           data-row-idx='${row}'
-          style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;' 
+          style='top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;'
           ${attr}
         >`;
 
@@ -3653,7 +3656,7 @@
           if (h == viewportH) {
             page = 0;
           } else {
-            page = Math.min(n - 1, Math.floor(scrollTop * ((th - viewportH) / (h - viewportH)) * (1 / ph)));
+            page = fixCurrentPage(Math.min(n - 1, Math.floor(scrollTop * ((th - viewportH) / (h - viewportH)) * (1 / ph))));
           }
           offset = Math.round(page * cj);
           if (oldOffset != offset) {
