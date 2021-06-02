@@ -869,7 +869,7 @@
     }
 
     function syncViewportScroll() {
-      let topLeftViewportScroll = $viewportTopL.scrollTop();
+      const topLeftViewportScroll = $viewportTopL.scrollTop();
       scrollTo(topLeftViewportScroll);
       render();
     }
