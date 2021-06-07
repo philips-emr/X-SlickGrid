@@ -215,3 +215,8 @@ classes should alter those!
   outline: 0;
   width: 100%;
 }
+
+div.slick-viewport.slick-viewport-top.slick-viewport-left::-webkit-scrollbar:vertical {
+  width: 0;
+  background: transparent;
+}

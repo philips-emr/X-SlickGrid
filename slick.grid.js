@@ -16,7 +16,7 @@
  *     and do proper cleanup.
  *
  */
-(function (factory) {
+ (function (factory) {
   if (typeof define === 'function' && define.amd) {
     define(['jquery'], factory);
   } else if (typeof exports === 'object') {
@@ -863,8 +863,15 @@
             $boundAncestors = $boundAncestors.add($elem);
           }
           $elem.bind("scroll." + uid, handleActiveCellPositionChange);
+          $elem.bind("scroll." + uid, syncViewportScroll);
         }
       }
+    }
+
+    function syncViewportScroll() {
+      const topLeftViewportScroll = $viewportTopL.scrollTop();
+      scrollTo(topLeftViewportScroll);
+      render();
     }
 
     function unbindAncestorScrollEvents() {
@@ -1861,7 +1868,7 @@
     function setOverflow() {
       $viewportTopL.css({
         'overflow-x': ( hasFrozenColumns() ) ? ( hasFrozenRows ? 'hidden' : 'scroll' ) : ( hasFrozenRows ? 'hidden' : 'auto' ),
-        'overflow-y': ( hasFrozenColumns() ) ? ( hasFrozenRows ? 'hidden' : 'hidden' ) : ( hasFrozenRows ? 'scroll' : 'auto' )
+        'overflow-y': ( hasFrozenColumns() ) ? ( hasFrozenRows ? 'hidden' : 'auto' ) : ( hasFrozenRows ? 'scroll' : 'auto' )
       });
 
       $viewportTopR.css({
@@ -3595,7 +3602,7 @@
     function _handleScroll(isMouseWheel) {
       var maxScrollDistanceY = $viewportScrollContainerY[0].scrollHeight - $viewportScrollContainerY[0].clientHeight;
       var maxScrollDistanceX = $viewportScrollContainerY[0].scrollWidth - $viewportScrollContainerY[0].clientWidth;
-
+      
       // Ceiling the max scroll values
       if (scrollTop > maxScrollDistanceY) {
         scrollTop = maxScrollDistanceY;
