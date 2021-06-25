@@ -3498,6 +3498,12 @@
       // remove rows no longer in the viewport
       cleanupRows(rendered);
 
+      if (hasFrozenColumns()) {
+        $viewportTopL.addClass('no-vertical-scrollbar');
+      } else {
+        $viewportTopL.removeClass('no-vertical-scrollbar');
+      }
+
       // add new rows & missing cells in existing rows
       if (lastRenderedScrollLeft != scrollLeft) {
 
