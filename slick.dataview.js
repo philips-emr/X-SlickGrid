@@ -63,7 +63,7 @@
       getter: null,
       formatter: null,
       comparer: function (a, b) {
-        return a.value - b.value;
+        return a.value ? a.value.localeCompare(b.value) : 0;
       },
       predefinedValues: [],
       aggregators: [],
@@ -76,6 +76,7 @@
     };
     var groupingInfos = [];
     var groups = [];
+    var lastGroupItem;
     var toggledGroupsByLevel = [];
     var groupingDelimiter = ':|:';
 
@@ -235,11 +236,11 @@
       return groupingInfos;
     }
 
-    function setGrouping(groupingInfo) {
+    function setGrouping(groupingInfo, lastGroup) {
       if (!options.groupItemMetadataProvider) {
         options.groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
       }
-
+      lastGroupItem = lastGroup;
       groups = [];
       toggledGroupsByLevel = [];
       groupingInfo = groupingInfo || [];
@@ -533,9 +534,16 @@
           group.groups = extractGroups(group.rows, group);
         }
       }
-
+      
       groups.sort(groupingInfos[level].comparer);
-
+      if(lastGroupItem && groups.length){
+        let index = groups.findIndex((g)=> {return g.value == lastGroupItem});
+        if(index >= 0){
+          let lastItem = groups[index];
+          groups.splice(0,1);
+          groups.push(lastItem);
+        }
+      }
       return groups;
     }
 
