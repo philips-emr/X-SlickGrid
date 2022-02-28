@@ -540,7 +540,7 @@
         let index = groups.findIndex((g)=> {return g.value == lastGroupItem});
         if(index >= 0){
           let lastItem = groups[index];
-          groups.splice(0,1);
+          groups.splice(index, 1);
           groups.push(lastItem);
         }
       }
