@@ -522,7 +522,9 @@
       for (var i = 0, l = rows.length; i < l; i++) {
         r = rows[i];
         val = gi.getterIsAFn ? gi.getter(r) : r[gi.getter];
-
+        if((!val || val == "null") && gi.formatter){
+		      val = gi.formatter(r);
+        }
         group = getOrCreateGroup(groupsByVal, val, level, parentGroup, groups);
 
         group.rows[group.count++] = r;
