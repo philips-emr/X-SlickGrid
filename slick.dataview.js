@@ -424,7 +424,7 @@
       return null;
     }
 
-    function expandCollapseGroupsEventNotify(isCollapsed, { level , groupingKey }) {
+    function expandCollapseGroupsEventNotify(isCollapsed, level, groupingKey) {
       const onGroupEvent = isCollapsed ? onGroupCollapsed : onGroupExpanded;
       onGroupEvent.notify({level, groupingKey});
     }
@@ -435,13 +435,13 @@
           toggledGroupsByLevel[i] = {};
           groupingInfos[i].collapsed = collapse;
 
-          expandCollapseGroupsEventNotify(collapse, {level:i, groupingKey:null});
+          expandCollapseGroupsEventNotify(collapse, i, null);
         }
       } else {
         toggledGroupsByLevel[level] = {};
         groupingInfos[level].collapsed = collapse;
 
-        expandCollapseGroupsEventNotify(collapse, {level:level, groupingKey:null});
+        expandCollapseGroupsEventNotify(collapse, level, null);
       }
       refresh();
     }
@@ -461,11 +461,11 @@
     }
 
     function expandCollapseGroup(args, collapse) {
-      var opts = resolveLevelAndGroupingKey(args);
-      toggledGroupsByLevel[opts.level][opts.groupingKey] = groupingInfos[opts.level].collapsed ^ collapse;
+      const [level, groupingKey] = resolveLevelAndGroupingKey(args);
+      toggledGroupsByLevel[level][groupingKey] = groupingInfos[level].collapsed ^ collapse;
       refresh();
 
-      expandCollapseGroupsEventNotify(collapse, opts);
+      expandCollapseGroupsEventNotify(collapse, level, groupingKey);
     }
 
     function resolveLevelAndGroupingKey(args) {
