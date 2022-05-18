@@ -88,6 +88,8 @@
     var onRowCountChanged = new Slick.Event();
     var onRowsChanged = new Slick.Event();
     var onPagingInfoChanged = new Slick.Event();
+    var onGroupExpanded = new Slick.Event();
+    var onGroupCollapsed = new Slick.Event();
 
     options = $.extend(true, {}, defaults, options);
 
@@ -422,15 +424,24 @@
       return null;
     }
 
+    function expandCollapseGroupsEventNotify(isCollapsed, level, groupingKey) {
+      const onGroupEvent = isCollapsed ? onGroupCollapsed : onGroupExpanded;
+      onGroupEvent.notify({level, groupingKey});
+    }
+
     function expandCollapseAllGroups(level, collapse) {
       if (level === null) {
         for (var i = 0; i < groupingInfos.length; i++) {
           toggledGroupsByLevel[i] = {};
           groupingInfos[i].collapsed = collapse;
+
+          expandCollapseGroupsEventNotify(collapse, i, null);
         }
       } else {
         toggledGroupsByLevel[level] = {};
         groupingInfos[level].collapsed = collapse;
+
+        expandCollapseGroupsEventNotify(collapse, level, null);
       }
       refresh();
     }
@@ -450,9 +461,11 @@
     }
 
     function expandCollapseGroup(args, collapse) {
-      var opts = resolveLevelAndGroupingKey(args);
-      toggledGroupsByLevel[opts.level][opts.groupingKey] = groupingInfos[opts.level].collapsed ^ collapse;
+      const [level, groupingKey] = resolveLevelAndGroupingKey(args);
+      toggledGroupsByLevel[level][groupingKey] = groupingInfos[level].collapsed ^ collapse;
       refresh();
+
+      expandCollapseGroupsEventNotify(collapse, level, groupingKey);
     }
 
     function resolveLevelAndGroupingKey(args) {
@@ -1064,7 +1077,9 @@
       // events
       "onRowCountChanged": onRowCountChanged,
       "onRowsChanged": onRowsChanged,
-      "onPagingInfoChanged": onPagingInfoChanged
+      "onPagingInfoChanged": onPagingInfoChanged,
+      "onGroupExpanded": onGroupExpanded,
+      "onGroupCollapsed": onGroupCollapsed
     });
   }
 
