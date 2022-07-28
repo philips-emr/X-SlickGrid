@@ -2690,7 +2690,7 @@
       return item[columnDef.field];
     }
 
-    function appendRowHtml(stringArrayL, stringArrayR, row, range, dataLength) {
+    function appendRowHtml(elemtL, stringArrayR, row, range, dataLength) {
       var d = getDataItem(row);
       var dataLoading = row < dataLength && !d;
       var rowCss = "slick-row" +
@@ -2730,7 +2730,15 @@
           ${attr}
         >`;
 
-      stringArrayL.push(rowHtml);
+      const rowElemt = document.createElement("div");
+      if (options.draggable) {
+        rowElemt.setAttribute('draggable','true')
+        rowElemt.setAttribute('data-draggable-row');
+      }
+      rowElemt.setAttribute('class', `ui-widget-content ${rowCss}`);
+      rowElemt.setAttribute('data-row-idx', `${row}`);
+      rowElemt.setAttribute('style', `top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;`);
+      rowElemt.setAttribute(`${attr}`);
 
       if (hasFrozenColumns()) {
         stringArrayR.push(rowHtml);
@@ -2761,10 +2769,10 @@
           if (hasFrozenColumns() && ( isRTL() ? (indexToCompare < frozenColumn) : (indexToCompare > frozenColumn))) {
             appendCellHtml(stringArrayR, row, indexToCompare, colspan, d);
           } else {
-            appendCellHtml(stringArrayL, row, indexToCompare, colspan, d);
+            appendCellElemt(rowElemt, row, indexToCompare, colspan, d);
           }
         } else if (hasFrozenColumns() && ( i <= frozenColumn )) {
-          appendCellHtml(stringArrayL, row, i, colspan, d);
+          appendCellElemt(rowElemt, row, i, colspan, d);
         }
 
         if (colspan > 1) {
@@ -2772,21 +2780,21 @@
         }
       }
 
-      stringArrayL.push("</div>");
+      elemtL.append(rowElemt);
 
       if (hasFrozenColumns()) {
         stringArrayR.push("</div>");
       }
     }
 
-    function appendCellHtml(stringArray, row, cell, colspan, item) {
-      var m;
+    function getCellCss(row, cell, colspan) {
+      let m;
       if (isRTL()) {
         m = columns[columns.length - 1 - cell];
       } else {
         m = columns[cell];
       }
-      var cellCss = "slick-cell l" + cell + " r" + Math.min(columns.length - 1, cell + colspan - 1) +
+      let cellCss = "slick-cell l" + cell + " r" + Math.min(columns.length - 1, cell + colspan - 1) +
           (m.cssClass ? " " + m.cssClass : "");
 
       if (hasFrozenColumns() && cell <= options.frozenColumn)
@@ -2796,26 +2804,68 @@
         cellCss += " active";
 
       // TODO:  merge them together in the setter
-      for (var key in cellCssClasses) {
+      for (const key in cellCssClasses) {
         if (cellCssClasses[key][row] && cellCssClasses[key][row][m.id]) {
           cellCss += (" " + cellCssClasses[key][row][m.id]);
         }
       }
+      return cellCss;
+    }
 
+    function setRowCacheCellColspan(row, cell, colspan) {
+      rowsCache[row].cellRenderQueue.push(cell);
+      rowsCache[row].cellColSpans[cell] = colspan;
+    }
+
+    function htmlToElem(html) {
+      let result = html;
+      try {
+        const temp = document.createElement('template');
+        temp.innerHTML = html.trim();
+        result = temp.content.firstChild;
+      } catch (e) {
+        $log.info(`Can not parse html string to Element. string : ${html}`, e);
+      }
+      return result;
+    }
+
+    function appendCellHtml(stringArray, row, cell, colspan, item) {
+      const cellCss = getCellCss(row, cell, colspan);
       stringArray.push("<div class='" + cellCss + "' style='height: " + getRowHeight(row) + "px'>");
 
       // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
       if (item) {
         var value = getDataItemValueForColumn(item, m);
         stringArray.push(callFormatter(row, cell, value, m, item));
+        console.log('passou');
       }
 
       stringArray.push("</div>");
-
-      rowsCache[row].cellRenderQueue.push(cell);
-      rowsCache[row].cellColSpans[cell] = colspan;
+      setRowCacheCellColspan(row, cell, colspan);
     }
 
+    function appendCellElemt(rowElemt, row, cell, colspan, item) {
+      const cellCss = getCellCss(row, cell, colspan);
+      const cellElemt = document.createElement("div");
+      cellElemt.setAttribute('class', `${cellCss}`);
+      cellElemt.setAttribute('style', `height: ${getRowHeight(row)}px`);
+
+      // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
+      if (item) {
+        const value = getDataItemValueForColumn(item, m);
+        let result = callFormatter(row, cell, value, m, item);
+
+        if (typeof result === 'string') {
+          result = htmlToElem(result);
+        }
+
+        cellElemt.append(result);
+      }
+      
+      rowElemt.append(cellElemt)
+
+      setRowCacheCellColspan(row, cell, colspan);
+    }
 
     function cleanupRows(rangeToKeep) {
       for (var i in rowsCache) {
@@ -2910,6 +2960,7 @@
         currentEditor.loadValue(d);
       } else {
     	$(cellNode).html(d ? callFormatter(row, cell, getDataItemValueForColumn(d, m), m, d) : "");
+      console.log('passou');
         invalidatePostProcessingResults(row);
       }
     }
@@ -2937,6 +2988,7 @@
           currentEditor.loadValue(d);
         } else if (d) {
           $(node).html(callFormatter(row, columnIdx, getDataItemValueForColumn(d, m), m, d));
+          console.log('passou');
         } else {
           $(node).html("");
         }
@@ -3396,7 +3448,7 @@
     }
 
     function renderRows(range) {
-      var stringArrayL = [],
+      const elemtsL = document.createElement('div');
         stringArrayR = [],
         rows = [],
         needToReselectCell = false,
@@ -3427,7 +3479,7 @@
           "cellRenderQueue": []
         };
 
-        appendRowHtml(stringArrayL, stringArrayR, i, range, dataLength);
+        appendRowHtml(elemtsL, stringArrayR, i, range, dataLength);
         if (activeCellNode && activeRow === i) {
           needToReselectCell = true;
         }
@@ -3438,29 +3490,26 @@
         return;
       }
 
-      var x = document.createElement("div"),
-        xRight = document.createElement("div");
-
-      $(x).html(stringArrayL.join(""));
+      const xRight = document.createElement("div");
       $(xRight).html(stringArrayR.join(""));
 
       for (var i = 0, ii = rows.length; i < ii; i++) {
         if (( hasFrozenRows ) && ( rows[i] >= actualFrozenRow )) {
           if (hasFrozenColumns()) {
             rowsCache[rows[i]].rowNode = $()
-              .add($(x.firstChild).appendTo($canvasBottomL))
+              .add($(elemtsL.firstChild).appendTo($canvasBottomL))
               .add($(xRight.firstChild).appendTo($canvasBottomR));
           } else {
             rowsCache[rows[i]].rowNode = $()
-              .add($(x.firstChild).appendTo($canvasBottomL));
+              .add($(elemtsL.firstChild).appendTo($canvasBottomL));
           }
         } else if (hasFrozenColumns()) {
           rowsCache[rows[i]].rowNode = $()
-            .add($(x.firstChild).appendTo($canvasTopL))
+            .add($(elemtsL.firstChild).appendTo($canvasTopL))
             .add($(xRight.firstChild).appendTo($canvasTopR));
         } else {
           rowsCache[rows[i]].rowNode = $()
-            .add($(x.firstChild).appendTo($canvasTopL));
+            .add($(elemtsL.firstChild).appendTo($canvasTopL));
         }
       }
 
@@ -4340,6 +4389,7 @@
         if (d) {
           var column = columns[activeCell];
           $(activeCellNode[0]).html(callFormatter(activeRow, activeCell, getDataItemValueForColumn(d, column), column, d));
+          console.log('passou');
           invalidatePostProcessingResults(activeRow);
         }
       }
