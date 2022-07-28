@@ -2738,7 +2738,9 @@
       rowElemt.setAttribute('class', `ui-widget-content ${rowCss}`);
       rowElemt.setAttribute('data-row-idx', `${row}`);
       rowElemt.setAttribute('style', `top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;`);
-      rowElemt.setAttribute(`${attr}`);
+      if (attr && attr.length) {
+        rowElemt.setAttribute(`${attr}`);
+      }
 
       if (hasFrozenColumns()) {
         stringArrayR.push(rowHtml);
@@ -2787,7 +2789,7 @@
       }
     }
 
-    function getCellCss(row, cell, colspan) {
+    function getCellCssM(row, cell, colspan) {
       let m;
       if (isRTL()) {
         m = columns[columns.length - 1 - cell];
@@ -2809,7 +2811,7 @@
           cellCss += (" " + cellCssClasses[key][row][m.id]);
         }
       }
-      return cellCss;
+      return {cellCss, m };
     }
 
     function setRowCacheCellColspan(row, cell, colspan) {
@@ -2830,14 +2832,13 @@
     }
 
     function appendCellHtml(stringArray, row, cell, colspan, item) {
-      const cellCss = getCellCss(row, cell, colspan);
+      const { cellCss, m } = getCellCssM(row, cell, colspan);
       stringArray.push("<div class='" + cellCss + "' style='height: " + getRowHeight(row) + "px'>");
 
       // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
       if (item) {
         var value = getDataItemValueForColumn(item, m);
         stringArray.push(callFormatter(row, cell, value, m, item));
-        console.log('passou');
       }
 
       stringArray.push("</div>");
@@ -2845,7 +2846,7 @@
     }
 
     function appendCellElemt(rowElemt, row, cell, colspan, item) {
-      const cellCss = getCellCss(row, cell, colspan);
+      const { cellCss, m } = getCellCssM(row, cell, colspan);
       const cellElemt = document.createElement("div");
       cellElemt.setAttribute('class', `${cellCss}`);
       cellElemt.setAttribute('style', `height: ${getRowHeight(row)}px`);
@@ -2960,7 +2961,6 @@
         currentEditor.loadValue(d);
       } else {
     	$(cellNode).html(d ? callFormatter(row, cell, getDataItemValueForColumn(d, m), m, d) : "");
-      console.log('passou');
         invalidatePostProcessingResults(row);
       }
     }
@@ -2988,7 +2988,6 @@
           currentEditor.loadValue(d);
         } else if (d) {
           $(node).html(callFormatter(row, columnIdx, getDataItemValueForColumn(d, m), m, d));
-          console.log('passou');
         } else {
           $(node).html("");
         }
@@ -4389,7 +4388,6 @@
         if (d) {
           var column = columns[activeCell];
           $(activeCellNode[0]).html(callFormatter(activeRow, activeCell, getDataItemValueForColumn(d, column), column, d));
-          console.log('passou');
           invalidatePostProcessingResults(activeRow);
         }
       }
