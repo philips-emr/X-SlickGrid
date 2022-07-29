@@ -43,6 +43,11 @@ X-SlickGrid is a extension of the great [SlickGrid](https://github.com/mleibman/
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request
 
+## Build-Local
+Copy the changed file and paste in nodemodules, it is not necessary to run local gulp build and not nine specific.
+But for production environment it is necessary to generate release, and change package lock and packagejson
+
+
 ## Credits
 
 >* [Michael Leibman](https://github.com/mleibman) by [SlickGrid](https://github.com/mleibman/SlickGrid)
