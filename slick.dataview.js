@@ -461,7 +461,7 @@
     }
 
     function expandCollapseGroup(args, collapse) {
-      const [level, groupingKey] = resolveLevelAndGroupingKey(args);
+      const {level, groupingKey} = resolveLevelAndGroupingKey(args);
       toggledGroupsByLevel[level][groupingKey] = groupingInfos[level].collapsed ^ collapse;
       refresh();
 
