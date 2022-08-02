@@ -2730,17 +2730,26 @@
           ${attr}
         >`;
 
-      const rowElemt = document.createElement("div");
+      let rowElemt = document.createElement('div');
+      if (attr && attr.length) {
+        
+        const htmlToElem = (html) => {
+          const temp = document.createElement('template');
+          temp.innerHTML = html.trim();
+          return temp.content.firstChild;
+        };
+        
+        rowElemt = htmlToElem(`<div ${attr}>`);
+      }
+
       if (options.draggable) {
         rowElemt.setAttribute('draggable','true')
         rowElemt.setAttribute('data-draggable-row');
       }
+
       rowElemt.setAttribute('class', `ui-widget-content ${rowCss}`);
       rowElemt.setAttribute('data-row-idx', `${row}`);
       rowElemt.setAttribute('style', `top: ${getRowTop(row) - frozenRowOffset}px; height: ${getRowHeight(row)}px;`);
-      if (attr && attr.length) {
-        rowElemt.setAttribute(`${attr}`);
-      }
 
       if (hasFrozenColumns()) {
         stringArrayR.push(rowHtml);
