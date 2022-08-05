@@ -2732,14 +2732,8 @@
 
       let rowElemt = document.createElement('div');
       if (attr && attr.length) {
-        
-        const htmlToElem = (html) => {
-          const temp = document.createElement('template');
-          temp.innerHTML = html.trim();
-          return temp.content.firstChild;
-        };
-        
-        rowElemt = htmlToElem(`<div ${attr}>`);
+        rowElemt.innerHTML = `<div ${attr}>`;
+        rowElemt = rowElemt.firstChild;
       }
 
       if (options.draggable) {
@@ -2828,18 +2822,6 @@
       rowsCache[row].cellColSpans[cell] = colspan;
     }
 
-    function htmlToElem(html) {
-      let result = html;
-      try {
-        const temp = document.createElement('template');
-        temp.innerHTML = html.trim();
-        result = temp.content.firstChild;
-      } catch (e) {
-        $log.info(`Can not parse html string to Element. string : ${html}`, e);
-      }
-      return result;
-    }
-
     function appendCellHtml(stringArray, row, cell, colspan, item) {
       const { cellCss, m } = getCellCssM(row, cell, colspan);
       stringArray.push("<div class='" + cellCss + "' style='height: " + getRowHeight(row) + "px'>");
@@ -2866,10 +2848,10 @@
         let result = callFormatter(row, cell, value, m, item);
 
         if (typeof result === 'string') {
-          result = htmlToElem(result);
+          cellElemt.innerHTML = result.trim();
+        } else {
+          cellElemt.append(result);
         }
-
-        cellElemt.append(result);
       }
       
       rowElemt.append(cellElemt)
