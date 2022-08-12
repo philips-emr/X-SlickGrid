@@ -2738,7 +2738,7 @@
 
       if (options.draggable) {
         rowElemt.setAttribute('draggable','true')
-        rowElemt.setAttribute('data-draggable-row');
+        rowElemt.setAttribute('data-draggable-row', 'true');
       }
 
       rowElemt.setAttribute('class', `ui-widget-content ${rowCss}`);
@@ -2897,7 +2897,7 @@
 
     function removeRowFromCache(row) {
       var cacheEntry = rowsCache[row];
-      if (!cacheEntry) {
+      if (!cacheEntry || !cacheEntry.rowNode) {
         return;
       }
 
