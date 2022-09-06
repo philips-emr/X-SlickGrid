@@ -326,7 +326,7 @@
       ensureRowsByIdCache();
       for (var i = 0, l = idArray.length; i < l; i++) {
         var row = rowsById[idArray[i]];
-        if (row !== null) {
+        if (row !== null && row !== undefined) {
           rows[rows.length] = row;
         }
       }
