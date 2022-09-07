@@ -2336,7 +2336,7 @@
       var hash = {};
       for (var i = 0; i < ranges.length; i++) {
         for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
-          if (!hash[j]) {  // prevent duplicates
+          if (!hash[j] && canRowBeSelected(j)) {  // prevent duplicates
             selectedRows.push(j);
             hash[j] = {};
           }
@@ -4988,6 +4988,18 @@
       return columns[cell].selectable;
     }
 
+    function canRowBeSelected(row) {
+      if (row >= getDataLength() || row < 0) {
+        return false;
+      }
+
+      var rowMetadata = data.getItemMetadata && data.getItemMetadata(row);
+      if (rowMetadata && typeof rowMetadata.selectable === "boolean") {
+        return rowMetadata.selectable;
+      }
+
+      return true;
+    }
     function gotoCell(row, cell, forceEdit) {
       if (!initialized) { return; }
       if (!canCellBeActive(row, cell)) {
