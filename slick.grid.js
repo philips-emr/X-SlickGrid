@@ -1958,26 +1958,27 @@ import fastdom from "fastdom";
 
     function createCssRules() {
       $style = $("<style type='text/css' rel='stylesheet' />").appendTo($("head"));
-      var rowHeight = (options.rowHeight - cellHeightDiff);
-      var rules = [
-          "." + uid + " .slick-group-header-column { " + (isRTL() ? "right: 1000px;" : "left: 1000px;") + "}",
-          "." + uid + " .slick-header-column { " + (isRTL() ? "right: 1000px;" : "left: 1000px;") + " }",
-          "." + uid + " .slick-top-panel { height:" + options.topPanelHeight + "px; }",
-          "." + uid + " .slick-headerrow-columns { height:" + options.headerRowHeight + "px; }",
-          "." + uid + " .slick-cell { height:" + rowHeight + "px; }",
-          "." + uid + " .slick-row { height:" + options.rowHeight + "px; }",
-          "." + uid + " .slick-footerrow-columns { height:" + options.footerRowHeight + "px; }"
+      let rowHeight = (options.rowHeight - cellHeightDiff);
+      let rules = [
+        `.${uid} .slick-group-header-column { ${isRTL() ? "right: 1000px;" : "left: 1000px;"} }`,
+        `.${uid} .slick-header-column { ${isRTL() ? "right: 1000px;" : "left: 1000px;"} }`,
+        `.${uid} .slick-top-panel {  height:${options.topPanelHeight}px; }`,
+        `.${uid} .slick-headerrow-columns {  height:${options.headerRowHeight}px; }`,
+        `.${uid} .slick-cell {  height:${rowHeight}px; }`,
+        `.${uid} .slick-row {  height:${options.rowHeight}px; }`,
+        `.${uid} .slick-footerrow-columns {  height:${options.footerRowHeight}px; }`,
       ];
 
-      for (var i = 0; i < columns.length; i++) {
-        rules.push("." + uid + " .l" + i + " { }");
-        rules.push("." + uid + " .r" + i + " { }");
+      for (let i = 0; i < columns.length; i++) {
+        rules.push(`.${uid} .l${i} { }`);
+        rules.push(`.${uid} .r${i} { }`);
       }
 
       if ($style[0].styleSheet) { // IE
         $style[0].styleSheet.cssText = rules.join(" ");
       } else {
-        $style[0].appendChild(document.createTextNode(rules.join(" ")));
+        const textNode = document.createTextNode(rules.join(" "));
+        $style[0].appendChild(textNode);
       }
     }
 
@@ -2094,83 +2095,86 @@ import fastdom from "fastdom";
     }
 
     function autosizeColumns() {
-      var i, c,
+      fastdom.measure(function () {
+        var i, c,
           widths = [],
           shrinkLeeway = 0,
           total = 0,
           prevTotal,
           availWidth = viewportHasVScroll ? viewportW - scrollbarDimensions.width : viewportW;
 
-      for (i = 0; i < columns.length; i++) {
-        c = columns[i];
-        widths.push(c.width);
-        total += c.width;
-        if (c.resizable) {
-          shrinkLeeway += c.width - Math.max(c.minWidth, absoluteColumnMinWidth);
-        }
-      }
-
-      // shrink
-      prevTotal = total;
-      while (total > availWidth && shrinkLeeway) {
-        var shrinkProportion = (total - availWidth) / shrinkLeeway;
-        for (i = 0; i < columns.length && total > availWidth; i++) {
+        for (i = 0; i < columns.length; i++) {
           c = columns[i];
-          var width = widths[i];
-          if (!c.resizable || width <= c.minWidth || width <= absoluteColumnMinWidth) {
-            continue;
+          widths.push(c.width);
+          total += c.width;
+          if (c.resizable) {
+            shrinkLeeway += c.width - Math.max(c.minWidth, absoluteColumnMinWidth);
           }
-          var absMinWidth = Math.max(c.minWidth, absoluteColumnMinWidth);
-          var shrinkSize = Math.floor(shrinkProportion * (width - absMinWidth)) || 1;
-          shrinkSize = Math.min(shrinkSize, width - absMinWidth);
-          total -= shrinkSize;
-          shrinkLeeway -= shrinkSize;
-          widths[i] -= shrinkSize;
         }
-        if (prevTotal <= total) {  // avoid infinite loop
-          break;
-        }
+
+        // shrink
         prevTotal = total;
-      }
-
-      // grow
-      prevTotal = total;
-      while (total < availWidth) {
-        var growProportion = availWidth / total;
-        for (i = 0; i < columns.length && total < availWidth; i++) {
-          c = columns[i];
-          var currentWidth = widths[i];
-          var growSize;
-
-          if (!c.resizable || c.maxWidth <= currentWidth) {
-            growSize = 0;
-          } else {
-            growSize = Math.min(Math.floor(growProportion * currentWidth) - currentWidth, (c.maxWidth - currentWidth) || 1000000) || 1;
+        while (total > availWidth && shrinkLeeway) {
+          var shrinkProportion = (total - availWidth) / shrinkLeeway;
+          for (i = 0; i < columns.length && total > availWidth; i++) {
+            c = columns[i];
+            var width = widths[i];
+            if (!c.resizable || width <= c.minWidth || width <= absoluteColumnMinWidth) {
+              continue;
+            }
+            var absMinWidth = Math.max(c.minWidth, absoluteColumnMinWidth);
+            var shrinkSize = Math.floor(shrinkProportion * (width - absMinWidth)) || 1;
+            shrinkSize = Math.min(shrinkSize, width - absMinWidth);
+            total -= shrinkSize;
+            shrinkLeeway -= shrinkSize;
+            widths[i] -= shrinkSize;
           }
-          total += growSize;
-          widths[i] += growSize;
+          if (prevTotal <= total) {  // avoid infinite loop
+            break;
+          }
+          prevTotal = total;
         }
-        if (prevTotal >= total) {  // avoid infinite loop
-          break;
-        }
+
+        // grow
         prevTotal = total;
-      }
+        while (total < availWidth) {
+          var growProportion = availWidth / total;
+          for (i = 0; i < columns.length && total < availWidth; i++) {
+            c = columns[i];
+            var currentWidth = widths[i];
+            var growSize;
 
-      var reRender = false;
-      for (i = 0; i < columns.length; i++) {
-        if (columns[i].rerenderOnResize && columns[i].width != widths[i]) {
-          reRender = true;
+            if (!c.resizable || c.maxWidth <= currentWidth) {
+              growSize = 0;
+            } else {
+              growSize = Math.min(Math.floor(growProportion * currentWidth) - currentWidth, (c.maxWidth - currentWidth) || 1000000) || 1;
+            }
+            total += growSize;
+            widths[i] += growSize;
+          }
+          if (prevTotal >= total) {  // avoid infinite loop
+            break;
+          }
+          prevTotal = total;
         }
-        columns[i].width = widths[i];
-      }
+        fastdom.mutate(function () {
+          var reRender = false;
+          for (i = 0; i < columns.length; i++) {
+            if (columns[i].rerenderOnResize && columns[i].width != widths[i]) {
+              reRender = true;
+            }
+            columns[i].width = widths[i];
+          }
 
-      applyColumnHeaderWidths();
-      applyColumnGroupHeaderWidths();
-      updateCanvasWidth(true);
-      if (reRender) {
-        invalidateAllRows();
-        render();
-      }
+          applyColumnHeaderWidths();
+          applyColumnGroupHeaderWidths();
+          updateCanvasWidth(true);
+          if (reRender) {
+            invalidateAllRows();
+            render();
+          }
+        });
+      });
     }
 
     function applyColumnGroupHeaderWidths() {
@@ -2295,21 +2299,24 @@ import fastdom from "fastdom";
     }
 
     function simpleColumnCalc(canvasWidth, w, x, i, theColumns, rule) {
-      if (isRTL()) {
-        var leftWidth = canvasWidth - (w + x);
-        var rightWidth = x;
+      fastdom.measure(function () {
+        let {style: styleLeft} = rule.left,
+          {style: styleRight} = rule.right;
+        let leftWidth = '',
+          rightWidth = '';
+        if (isRTL()) {
+          leftWidth = `${canvasWidth - (w + x)}px`;
+          rightWidth = `${x}px`;
+        } else {
+          leftWidth = `${x}px`;
+          rightWidth = `${canvasWidth - (w + x)}px`;
+        }
 
-        var totalWidth = theColumns.reduce((sum, column) => sum + column.width, 0);
-
-        rule.left.style.left = leftWidth + "px";
-        rule.right.style.right = rightWidth + "px";
-      } else {
-        var leftWidth = x;
-        var rightWidth = canvasWidth - (w + x);
-
-        rule.left.style.left = leftWidth + "px";
-        rule.right.style.right = rightWidth + "px";
-      }
+        fastdom.mutate(function () {
+          styleLeft.setProperty('left', leftWidth);
+          styleRight.setProperty('right', rightWidth);
+        });
+      });
     }
 
     function setSortColumn(columnId, ascending) {
@@ -3450,7 +3457,7 @@ import fastdom from "fastdom";
     }
 
     function renderRows(range) {
-      const elemtsL = document.createElement('div');
+      let elemtsL = document.createElement('div'),
         stringArrayR = [],
         rows = [],
         needToReselectCell = false,
@@ -4307,7 +4314,7 @@ import fastdom from "fastdom";
             : frozenRowsHeight;
         }
 
-        cell = getCellFromPoint($activeCellOffset.left, Math.ceil($activeCellOffset.top) - rowOffset);
+        let cell = getCellFromPoint($activeCellOffset.left, Math.ceil($activeCellOffset.top) - rowOffset);
 
         activeRow = cell.row;
         activeCell = activePosX = activeCell = activePosX = getCellFromNode(activeCellNode[0]);
