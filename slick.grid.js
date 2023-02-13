@@ -16,7 +16,9 @@
  *     and do proper cleanup.
  *
  */
- (function (factory) {
+import fastdom from "fastdom";
+
+(function (factory) {
   if (typeof define === 'function' && define.amd) {
     define(['jquery'], factory);
   } else if (typeof exports === 'object') {
@@ -2255,31 +2257,41 @@
     }
 
     function frozenColumnCalc(canvasWidth, theColumns, canvasWidthR, canvasWidthL, x, w, i, rule) {
-      if (isRTL()) {
-        var shouldUseRightWidth = (options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn));
+      fastdom.measure(function () {
+        let {style: styleLeft} = rule.left,
+          {style: styleRight} = rule.right;
+        let left = '',
+          right = '';
+        if (isRTL()) {
+          let shouldUseRightWidth = (options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn));
 
-        var availableWidth = options.fullWidthRows ?
-          (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
-          (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+          let availableWidth = options.fullWidthRows ?
+            (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+            (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
 
-        var leftWidth = (availableWidth - canvasWidthL) - (x + w);
+          let leftWidth = (availableWidth - canvasWidthL) - (x + w);
 
-        rule.left.style.left = leftWidth + "px";
-        rule.right.style.right = x + "px";
-      } else {
-        var shouldUseRightWidth = (options.frozenColumn != -1 && i > options.frozenColumn);
+          left = `${leftWidth}px`;
+          right = `${x}px`;
+        } else {
+          let shouldUseRightWidth = (options.frozenColumn != -1 && i > options.frozenColumn);
 
-        var availableWidth = options.fullWidthRows ?
-          (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
-          (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+          let availableWidth = options.fullWidthRows ?
+            (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+            (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
 
-        var rightWidth = availableWidth - canvasWidthL > 0 ?
-          (availableWidth - canvasWidthL) - (x + w) :
-          (availableWidth) - (x + w);
+          let rightWidth = availableWidth - canvasWidthL > 0 ?
+            (availableWidth - canvasWidthL) - (x + w) :
+            (availableWidth) - (x + w);
 
-        rule.left.style.left = x + "px";
-        rule.right.style.right = rightWidth + "px";
-      }
+          left = `${x}px`;
+          right = `${rightWidth}px`;
+        }
+        fastdom.mutate(function () {
+          styleLeft.setProperty('left', left);
+          styleRight.setProperty('right', right);
+        });
+      });
     }
 
     function simpleColumnCalc(canvasWidth, w, x, i, theColumns, rule) {
@@ -2853,7 +2865,7 @@
           cellElemt.append(result);
         }
       }
-      
+
       rowElemt.append(cellElemt)
 
       setRowCacheCellColspan(row, cell, colspan);
@@ -3647,7 +3659,7 @@
     function _handleScroll(isMouseWheel) {
       var maxScrollDistanceY = $viewportScrollContainerY[0].scrollHeight - $viewportScrollContainerY[0].clientHeight;
       var maxScrollDistanceX = $viewportScrollContainerY[0].scrollWidth - $viewportScrollContainerY[0].clientWidth;
-      
+
       // Ceiling the max scroll values
       if (scrollTop > maxScrollDistanceY) {
         scrollTop = maxScrollDistanceY;
