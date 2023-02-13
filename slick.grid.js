@@ -199,6 +199,7 @@ import fastdom from "fastdom";
     var sortColumns = [];
     var columnPosLeft = [];
     var columnPosRight = [];
+    var head = document.querySelector('head');
 
 
     // async call handles
@@ -1957,7 +1958,10 @@ import fastdom from "fastdom";
     }
 
     function createCssRules() {
-      $style = $("<style type='text/css' rel='stylesheet' />").appendTo($("head"));
+      $style = $(document.createElement('style'));
+      const style = $style[0];
+      style.setAttribute('rel', 'stylesheet');
+      head.append(style);
       let rowHeight = (options.rowHeight - cellHeightDiff);
       let rules = [
         `.${uid} .slick-group-header-column { ${isRTL() ? "right: 1000px;" : "left: 1000px;"} }`,
@@ -1974,11 +1978,10 @@ import fastdom from "fastdom";
         rules.push(`.${uid} .r${i} { }`);
       }
 
-      if ($style[0].styleSheet) { // IE
-        $style[0].styleSheet.cssText = rules.join(" ");
+      if (style.styleSheet) { // IE
+        style.styleSheet.cssText = rules.join(" ");
       } else {
-        const textNode = document.createTextNode(rules.join(" "));
-        $style[0].appendChild(textNode);
+        style.append(rules.join(" "));
       }
     }
 
