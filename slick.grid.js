@@ -715,111 +715,110 @@ import fastdom from "fastdom";
     }
 
     function updateCanvasWidth(forceColumnWidthsUpdate) {
-      var oldCanvasWidth = canvasWidth;
-      var oldCanvasWidthL = canvasWidthL;
-      var oldCanvasWidthR = canvasWidthR;
-      var widthChanged;
-      canvasWidth = getCanvasWidth();
+      fastdom.measure(function () {
 
-      widthChanged = canvasWidth !== oldCanvasWidth || canvasWidthL !== oldCanvasWidthL || canvasWidthR !== oldCanvasWidthR;
+        var oldCanvasWidth = canvasWidth;
+        var oldCanvasWidthL = canvasWidthL;
+        var oldCanvasWidthR = canvasWidthR;
+        var widthChanged;
+        canvasWidth = getCanvasWidth();
 
-      if (widthChanged || hasFrozenColumns() || hasFrozenRows) {
-        $canvasTopL.width(canvasWidthL);
+        widthChanged = canvasWidth !== oldCanvasWidth || canvasWidthL !== oldCanvasWidthL || canvasWidthR !== oldCanvasWidthR;
 
         getHeadersWidth();
 
-        $headerL.width(headersWidthL);
-        $headerR.width(headersWidthR);
+        fastdom.mutate(function () {
+          if (widthChanged || hasFrozenColumns() || hasFrozenRows) {
+            $canvasTopL.width(canvasWidthL);
 
-        if (hasFrozenColumns()) {
-          $canvasTopR.width(canvasWidthR);
-          if (options.fullWidthRows) {
-            $canvasTopR.css("min-width", "100%");
+            $headerL.width(headersWidthL);
+            $headerR.width(headersWidthR);
+
+            if (hasFrozenColumns()) {
+              $canvasTopR.width(canvasWidthR);
+              if (options.fullWidthRows) {
+                $canvasTopR.css("min-width", "100%");
+              }
+
+              $paneHeaderL.width(canvasWidthL);
+              const viewPortCanvasWidthL = viewportW - canvasWidthL;
+              if (isRTL()) {
+                $paneHeaderR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
+              } else {
+                $paneHeaderR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
+              }
+
+              $paneTopL.width(canvasWidthL);
+              if (isRTL()) {
+                $paneTopR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
+              } else {
+                $paneTopR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
+              }
+
+              $headerRowScrollerL.width(canvasWidthL);
+              $headerRowScrollerR.width(viewPortCanvasWidthL);
+
+              $headerRowL.width(canvasWidthL);
+              $headerRowR.width(canvasWidthR);
+
+              $footerRowScrollerL.width(canvasWidthL);
+              $footerRowScrollerR.width(viewPortCanvasWidthL);
+
+              $footerRowL.width(canvasWidthL);
+              $footerRowR.width(canvasWidthR);
+
+              $viewportTopL.width(canvasWidthL);
+              $viewportTopR.width(viewPortCanvasWidthL);
+
+              if (hasFrozenRows) {
+                $paneBottomL.width(canvasWidthL);
+                $paneBottomR.css({'left': canvasWidthL, 'right': canvasWidthR});
+
+                $viewportBottomL.width(canvasWidthL);
+                $viewportBottomR.width(viewPortCanvasWidthL);
+
+                $canvasBottomL.width(canvasWidthL);
+                $canvasBottomR.width(canvasWidthR);
+              }
+            } else {
+              $paneHeaderL.width('100%');
+
+              $paneTopL.width('100%');
+
+              $headerRowScrollerL.width('100%');
+
+              $headerRowL.width(canvasWidth);
+
+              $footerRowScrollerL.width('100%');
+
+              $footerRowL.width(canvasWidth);
+
+              $viewportTopL.width('100%');
+
+              if (hasFrozenRows) {
+                $viewportBottomL.width('100%');
+                $canvasBottomL.width(canvasWidthL);
+              }
+
+              if (options.fullWidthRows) {
+                $canvasTopL.css("min-width", "100%");
+              }
+            }
+
+            viewportHasHScroll = (canvasWidth > viewportW - scrollbarDimensions.width);
           }
+          const canvasWidthViewPort = canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0);
+          $headerRowSpacerL.width(canvasWidthViewPort);
+          $headerRowSpacerR.width(canvasWidthViewPort);
 
-          $paneHeaderL.width(canvasWidthL);
-          if (isRTL()) {
-            $paneHeaderR.css('left', canvasWidthR);
-            $paneHeaderR.css('right', canvasWidthL);
-          } else {
-            $paneHeaderR.css('left', canvasWidthL);
-            $paneHeaderR.css('right', canvasWidthR);
+          $footerRowSpacerL.width(canvasWidthViewPort);
+          $footerRowSpacerR.width(canvasWidthViewPort);
+
+          if (widthChanged || forceColumnWidthsUpdate) {
+            applyColumnWidths();
           }
-          $paneHeaderR.css('width', viewportW - canvasWidthL);
-
-          $paneTopL.width(canvasWidthL);
-          if (isRTL()) {
-            $paneTopR.css('left', canvasWidthR);
-            $paneTopR.css('right', canvasWidthL);
-          } else {
-            $paneTopR.css('left', canvasWidthL);
-            $paneTopR.css('right', canvasWidthR);
-          }
-          $paneTopR.css('width', viewportW - canvasWidthL);
-
-          $headerRowScrollerL.width(canvasWidthL);
-          $headerRowScrollerR.width(viewportW - canvasWidthL);
-
-          $headerRowL.width(canvasWidthL);
-          $headerRowR.width(canvasWidthR);
-
-          $footerRowScrollerL.width(canvasWidthL);
-          $footerRowScrollerR.width(viewportW - canvasWidthL);
-
-          $footerRowL.width(canvasWidthL);
-          $footerRowR.width(canvasWidthR);
-
-          $viewportTopL.width(canvasWidthL);
-          $viewportTopR.width(viewportW - canvasWidthL);
-
-          if (hasFrozenRows) {
-            $paneBottomL.width(canvasWidthL);
-            $paneBottomR.css('left', canvasWidthL);
-            $paneBottomR.css('right', canvasWidthR);
-
-            $viewportBottomL.width(canvasWidthL);
-            $viewportBottomR.width(viewportW - canvasWidthL);
-
-            $canvasBottomL.width(canvasWidthL);
-            $canvasBottomR.width(canvasWidthR);
-          }
-        } else {
-          $paneHeaderL.width('100%');
-
-          $paneTopL.width('100%');
-
-          $headerRowScrollerL.width('100%');
-
-          $headerRowL.width(canvasWidth);
-
-          $footerRowScrollerL.width('100%');
-
-          $footerRowL.width(canvasWidth);
-
-          $viewportTopL.width('100%');
-
-          if (hasFrozenRows) {
-            $viewportBottomL.width('100%');
-            $canvasBottomL.width(canvasWidthL);
-          }
-
-          if (options.fullWidthRows) {
-            $canvasTopL.css("min-width", "100%");
-          }
-        }
-
-        viewportHasHScroll = (canvasWidth > viewportW - scrollbarDimensions.width);
-      }
-
-      $headerRowSpacerL.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-      $headerRowSpacerR.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-
-      $footerRowSpacerL.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-      $footerRowSpacerR.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-
-      if (widthChanged || forceColumnWidthsUpdate) {
-        applyColumnWidths();
-      }
+        });
+      });
     }
 
     function disableSelection($target) {
@@ -3163,14 +3162,7 @@ import fastdom from "fastdom";
       if (!initialized) { return; }
 
       var dataLengthIncludingAddNew = getDataLengthIncludingAddNew();
-      var numberOfRows = 0;
       var oldH = ( hasFrozenRows && !options.frozenBottom ) ? $canvasBottomL.height() : $canvasTopL.height();
-
-      if (hasFrozenRows ) {
-        var numberOfRows = getDataLength() - options.frozenRow;
-      } else {
-        var numberOfRows = dataLengthIncludingAddNew + (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0);
-      }
 
       const items = typeof data.getItems === 'function' ? data.getItems() : data;
       const groups = typeof data.getGroups === 'function' ? data.getGroups() : [];
