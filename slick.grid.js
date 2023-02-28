@@ -16,7 +16,9 @@
  *     and do proper cleanup.
  *
  */
- (function (factory) {
+import fastdom from "fastdom";
+
+(function (factory) {
   if (typeof define === 'function' && define.amd) {
     define(['jquery'], factory);
   } else if (typeof exports === 'object') {
@@ -197,6 +199,7 @@
     var sortColumns = [];
     var columnPosLeft = [];
     var columnPosRight = [];
+    var head = document.querySelector('head');
 
 
     // async call handles
@@ -712,111 +715,110 @@
     }
 
     function updateCanvasWidth(forceColumnWidthsUpdate) {
-      var oldCanvasWidth = canvasWidth;
-      var oldCanvasWidthL = canvasWidthL;
-      var oldCanvasWidthR = canvasWidthR;
-      var widthChanged;
-      canvasWidth = getCanvasWidth();
+      fastdom.measure(function () {
 
-      widthChanged = canvasWidth !== oldCanvasWidth || canvasWidthL !== oldCanvasWidthL || canvasWidthR !== oldCanvasWidthR;
+        var oldCanvasWidth = canvasWidth;
+        var oldCanvasWidthL = canvasWidthL;
+        var oldCanvasWidthR = canvasWidthR;
+        var widthChanged;
+        canvasWidth = getCanvasWidth();
 
-      if (widthChanged || hasFrozenColumns() || hasFrozenRows) {
-        $canvasTopL.width(canvasWidthL);
+        widthChanged = canvasWidth !== oldCanvasWidth || canvasWidthL !== oldCanvasWidthL || canvasWidthR !== oldCanvasWidthR;
 
         getHeadersWidth();
 
-        $headerL.width(headersWidthL);
-        $headerR.width(headersWidthR);
+        fastdom.mutate(function () {
+          if (widthChanged || hasFrozenColumns() || hasFrozenRows) {
+            $canvasTopL.width(canvasWidthL);
 
-        if (hasFrozenColumns()) {
-          $canvasTopR.width(canvasWidthR);
-          if (options.fullWidthRows) {
-            $canvasTopR.css("min-width", "100%");
+            $headerL.width(headersWidthL);
+            $headerR.width(headersWidthR);
+
+            if (hasFrozenColumns()) {
+              $canvasTopR.width(canvasWidthR);
+              if (options.fullWidthRows) {
+                $canvasTopR.css("min-width", "100%");
+              }
+
+              $paneHeaderL.width(canvasWidthL);
+              const viewPortCanvasWidthL = viewportW - canvasWidthL;
+              if (isRTL()) {
+                $paneHeaderR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
+              } else {
+                $paneHeaderR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
+              }
+
+              $paneTopL.width(canvasWidthL);
+              if (isRTL()) {
+                $paneTopR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
+              } else {
+                $paneTopR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
+              }
+
+              $headerRowScrollerL.width(canvasWidthL);
+              $headerRowScrollerR.width(viewPortCanvasWidthL);
+
+              $headerRowL.width(canvasWidthL);
+              $headerRowR.width(canvasWidthR);
+
+              $footerRowScrollerL.width(canvasWidthL);
+              $footerRowScrollerR.width(viewPortCanvasWidthL);
+
+              $footerRowL.width(canvasWidthL);
+              $footerRowR.width(canvasWidthR);
+
+              $viewportTopL.width(canvasWidthL);
+              $viewportTopR.width(viewPortCanvasWidthL);
+
+              if (hasFrozenRows) {
+                $paneBottomL.width(canvasWidthL);
+                $paneBottomR.css({'left': canvasWidthL, 'right': canvasWidthR});
+
+                $viewportBottomL.width(canvasWidthL);
+                $viewportBottomR.width(viewPortCanvasWidthL);
+
+                $canvasBottomL.width(canvasWidthL);
+                $canvasBottomR.width(canvasWidthR);
+              }
+            } else {
+              $paneHeaderL.width('100%');
+
+              $paneTopL.width('100%');
+
+              $headerRowScrollerL.width('100%');
+
+              $headerRowL.width(canvasWidth);
+
+              $footerRowScrollerL.width('100%');
+
+              $footerRowL.width(canvasWidth);
+
+              $viewportTopL.width('100%');
+
+              if (hasFrozenRows) {
+                $viewportBottomL.width('100%');
+                $canvasBottomL.width(canvasWidthL);
+              }
+
+              if (options.fullWidthRows) {
+                $canvasTopL.css("min-width", "100%");
+              }
+            }
+
+            viewportHasHScroll = (canvasWidth > viewportW - scrollbarDimensions.width);
           }
+          const canvasWidthViewPort = canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0);
+          $headerRowSpacerL.width(canvasWidthViewPort);
+          $headerRowSpacerR.width(canvasWidthViewPort);
 
-          $paneHeaderL.width(canvasWidthL);
-          if (isRTL()) {
-            $paneHeaderR.css('left', canvasWidthR);
-            $paneHeaderR.css('right', canvasWidthL);
-          } else {
-            $paneHeaderR.css('left', canvasWidthL);
-            $paneHeaderR.css('right', canvasWidthR);
+          $footerRowSpacerL.width(canvasWidthViewPort);
+          $footerRowSpacerR.width(canvasWidthViewPort);
+
+          if (widthChanged || forceColumnWidthsUpdate) {
+            applyColumnWidths();
           }
-          $paneHeaderR.css('width', viewportW - canvasWidthL);
-
-          $paneTopL.width(canvasWidthL);
-          if (isRTL()) {
-            $paneTopR.css('left', canvasWidthR);
-            $paneTopR.css('right', canvasWidthL);
-          } else {
-            $paneTopR.css('left', canvasWidthL);
-            $paneTopR.css('right', canvasWidthR);
-          }
-          $paneTopR.css('width', viewportW - canvasWidthL);
-
-          $headerRowScrollerL.width(canvasWidthL);
-          $headerRowScrollerR.width(viewportW - canvasWidthL);
-
-          $headerRowL.width(canvasWidthL);
-          $headerRowR.width(canvasWidthR);
-
-          $footerRowScrollerL.width(canvasWidthL);
-          $footerRowScrollerR.width(viewportW - canvasWidthL);
-
-          $footerRowL.width(canvasWidthL);
-          $footerRowR.width(canvasWidthR);
-
-          $viewportTopL.width(canvasWidthL);
-          $viewportTopR.width(viewportW - canvasWidthL);
-
-          if (hasFrozenRows) {
-            $paneBottomL.width(canvasWidthL);
-            $paneBottomR.css('left', canvasWidthL);
-            $paneBottomR.css('right', canvasWidthR);
-
-            $viewportBottomL.width(canvasWidthL);
-            $viewportBottomR.width(viewportW - canvasWidthL);
-
-            $canvasBottomL.width(canvasWidthL);
-            $canvasBottomR.width(canvasWidthR);
-          }
-        } else {
-          $paneHeaderL.width('100%');
-
-          $paneTopL.width('100%');
-
-          $headerRowScrollerL.width('100%');
-
-          $headerRowL.width(canvasWidth);
-
-          $footerRowScrollerL.width('100%');
-
-          $footerRowL.width(canvasWidth);
-
-          $viewportTopL.width('100%');
-
-          if (hasFrozenRows) {
-            $viewportBottomL.width('100%');
-            $canvasBottomL.width(canvasWidthL);
-          }
-
-          if (options.fullWidthRows) {
-            $canvasTopL.css("min-width", "100%");
-          }
-        }
-
-        viewportHasHScroll = (canvasWidth > viewportW - scrollbarDimensions.width);
-      }
-
-      $headerRowSpacerL.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-      $headerRowSpacerR.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-
-      $footerRowSpacerL.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-      $footerRowSpacerR.width(canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0));
-
-      if (widthChanged || forceColumnWidthsUpdate) {
-        applyColumnWidths();
-      }
+        });
+      });
     }
 
     function disableSelection($target) {
@@ -1955,27 +1957,30 @@
     }
 
     function createCssRules() {
-      $style = $("<style type='text/css' rel='stylesheet' />").appendTo($("head"));
-      var rowHeight = (options.rowHeight - cellHeightDiff);
-      var rules = [
-          "." + uid + " .slick-group-header-column { " + (isRTL() ? "right: 1000px;" : "left: 1000px;") + "}",
-          "." + uid + " .slick-header-column { " + (isRTL() ? "right: 1000px;" : "left: 1000px;") + " }",
-          "." + uid + " .slick-top-panel { height:" + options.topPanelHeight + "px; }",
-          "." + uid + " .slick-headerrow-columns { height:" + options.headerRowHeight + "px; }",
-          "." + uid + " .slick-cell { height:" + rowHeight + "px; }",
-          "." + uid + " .slick-row { height:" + options.rowHeight + "px; }",
-          "." + uid + " .slick-footerrow-columns { height:" + options.footerRowHeight + "px; }"
+      $style = $(document.createElement('style'));
+      const style = $style[0];
+      style.setAttribute('rel', 'stylesheet');
+      head.append(style);
+      let rowHeight = (options.rowHeight - cellHeightDiff);
+      let rules = [
+        `.${uid} .slick-group-header-column { ${isRTL() ? "right: 1000px;" : "left: 1000px;"} }`,
+        `.${uid} .slick-header-column { ${isRTL() ? "right: 1000px;" : "left: 1000px;"} }`,
+        `.${uid} .slick-top-panel {  height:${options.topPanelHeight}px; }`,
+        `.${uid} .slick-headerrow-columns {  height:${options.headerRowHeight}px; }`,
+        `.${uid} .slick-cell {  height:${rowHeight}px; }`,
+        `.${uid} .slick-row {  height:${options.rowHeight}px; }`,
+        `.${uid} .slick-footerrow-columns {  height:${options.footerRowHeight}px; }`,
       ];
 
-      for (var i = 0; i < columns.length; i++) {
-        rules.push("." + uid + " .l" + i + " { }");
-        rules.push("." + uid + " .r" + i + " { }");
+      for (let i = 0; i < columns.length; i++) {
+        rules.push(`.${uid} .l${i} { }`);
+        rules.push(`.${uid} .r${i} { }`);
       }
 
-      if ($style[0].styleSheet) { // IE
-        $style[0].styleSheet.cssText = rules.join(" ");
+      if (style.styleSheet) { // IE
+        style.styleSheet.cssText = rules.join(" ");
       } else {
-        $style[0].appendChild(document.createTextNode(rules.join(" ")));
+        style.append(rules.join(" "));
       }
     }
 
@@ -2092,83 +2097,86 @@
     }
 
     function autosizeColumns() {
-      var i, c,
+      fastdom.measure(function () {
+        var i, c,
           widths = [],
           shrinkLeeway = 0,
           total = 0,
           prevTotal,
           availWidth = viewportHasVScroll ? viewportW - scrollbarDimensions.width : viewportW;
 
-      for (i = 0; i < columns.length; i++) {
-        c = columns[i];
-        widths.push(c.width);
-        total += c.width;
-        if (c.resizable) {
-          shrinkLeeway += c.width - Math.max(c.minWidth, absoluteColumnMinWidth);
-        }
-      }
-
-      // shrink
-      prevTotal = total;
-      while (total > availWidth && shrinkLeeway) {
-        var shrinkProportion = (total - availWidth) / shrinkLeeway;
-        for (i = 0; i < columns.length && total > availWidth; i++) {
+        for (i = 0; i < columns.length; i++) {
           c = columns[i];
-          var width = widths[i];
-          if (!c.resizable || width <= c.minWidth || width <= absoluteColumnMinWidth) {
-            continue;
+          widths.push(c.width);
+          total += c.width;
+          if (c.resizable) {
+            shrinkLeeway += c.width - Math.max(c.minWidth, absoluteColumnMinWidth);
           }
-          var absMinWidth = Math.max(c.minWidth, absoluteColumnMinWidth);
-          var shrinkSize = Math.floor(shrinkProportion * (width - absMinWidth)) || 1;
-          shrinkSize = Math.min(shrinkSize, width - absMinWidth);
-          total -= shrinkSize;
-          shrinkLeeway -= shrinkSize;
-          widths[i] -= shrinkSize;
         }
-        if (prevTotal <= total) {  // avoid infinite loop
-          break;
-        }
+
+        // shrink
         prevTotal = total;
-      }
-
-      // grow
-      prevTotal = total;
-      while (total < availWidth) {
-        var growProportion = availWidth / total;
-        for (i = 0; i < columns.length && total < availWidth; i++) {
-          c = columns[i];
-          var currentWidth = widths[i];
-          var growSize;
-
-          if (!c.resizable || c.maxWidth <= currentWidth) {
-            growSize = 0;
-          } else {
-            growSize = Math.min(Math.floor(growProportion * currentWidth) - currentWidth, (c.maxWidth - currentWidth) || 1000000) || 1;
+        while (total > availWidth && shrinkLeeway) {
+          var shrinkProportion = (total - availWidth) / shrinkLeeway;
+          for (i = 0; i < columns.length && total > availWidth; i++) {
+            c = columns[i];
+            var width = widths[i];
+            if (!c.resizable || width <= c.minWidth || width <= absoluteColumnMinWidth) {
+              continue;
+            }
+            var absMinWidth = Math.max(c.minWidth, absoluteColumnMinWidth);
+            var shrinkSize = Math.floor(shrinkProportion * (width - absMinWidth)) || 1;
+            shrinkSize = Math.min(shrinkSize, width - absMinWidth);
+            total -= shrinkSize;
+            shrinkLeeway -= shrinkSize;
+            widths[i] -= shrinkSize;
           }
-          total += growSize;
-          widths[i] += growSize;
+          if (prevTotal <= total) {  // avoid infinite loop
+            break;
+          }
+          prevTotal = total;
         }
-        if (prevTotal >= total) {  // avoid infinite loop
-          break;
-        }
+
+        // grow
         prevTotal = total;
-      }
+        while (total < availWidth) {
+          var growProportion = availWidth / total;
+          for (i = 0; i < columns.length && total < availWidth; i++) {
+            c = columns[i];
+            var currentWidth = widths[i];
+            var growSize;
 
-      var reRender = false;
-      for (i = 0; i < columns.length; i++) {
-        if (columns[i].rerenderOnResize && columns[i].width != widths[i]) {
-          reRender = true;
+            if (!c.resizable || c.maxWidth <= currentWidth) {
+              growSize = 0;
+            } else {
+              growSize = Math.min(Math.floor(growProportion * currentWidth) - currentWidth, (c.maxWidth - currentWidth) || 1000000) || 1;
+            }
+            total += growSize;
+            widths[i] += growSize;
+          }
+          if (prevTotal >= total) {  // avoid infinite loop
+            break;
+          }
+          prevTotal = total;
         }
-        columns[i].width = widths[i];
-      }
+        fastdom.mutate(function () {
+          var reRender = false;
+          for (i = 0; i < columns.length; i++) {
+            if (columns[i].rerenderOnResize && columns[i].width != widths[i]) {
+              reRender = true;
+            }
+            columns[i].width = widths[i];
+          }
 
-      applyColumnHeaderWidths();
-      applyColumnGroupHeaderWidths();
-      updateCanvasWidth(true);
-      if (reRender) {
-        invalidateAllRows();
-        render();
-      }
+          applyColumnHeaderWidths();
+          applyColumnGroupHeaderWidths();
+          updateCanvasWidth(true);
+          if (reRender) {
+            invalidateAllRows();
+            render();
+          }
+        });
+      });
     }
 
     function applyColumnGroupHeaderWidths() {
@@ -2255,49 +2263,62 @@
     }
 
     function frozenColumnCalc(canvasWidth, theColumns, canvasWidthR, canvasWidthL, x, w, i, rule) {
-      if (isRTL()) {
-        var shouldUseRightWidth = (options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn));
+      fastdom.measure(function () {
+        let {style: styleLeft} = rule.left,
+          {style: styleRight} = rule.right;
+        let left = '',
+          right = '';
+        if (isRTL()) {
+          let shouldUseRightWidth = (options.frozenColumn != -1 && i < (theColumns.length - 1 - options.frozenColumn));
 
-        var availableWidth = options.fullWidthRows ?
-          (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
-          (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+          let availableWidth = options.fullWidthRows ?
+            (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+            (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
 
-        var leftWidth = (availableWidth - canvasWidthL) - (x + w);
+          let leftWidth = (availableWidth - canvasWidthL) - (x + w);
 
-        rule.left.style.left = leftWidth + "px";
-        rule.right.style.right = x + "px";
-      } else {
-        var shouldUseRightWidth = (options.frozenColumn != -1 && i > options.frozenColumn);
+          left = `${leftWidth}px`;
+          right = `${x}px`;
+        } else {
+          let shouldUseRightWidth = (options.frozenColumn != -1 && i > options.frozenColumn);
 
-        var availableWidth = options.fullWidthRows ?
-          (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
-          (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
+          let availableWidth = options.fullWidthRows ?
+            (shouldUseRightWidth ? canvasWidth : canvasWidthL) :
+            (shouldUseRightWidth ? canvasWidthR : canvasWidthL);
 
-        var rightWidth = availableWidth - canvasWidthL > 0 ?
-          (availableWidth - canvasWidthL) - (x + w) :
-          (availableWidth) - (x + w);
+          let rightWidth = availableWidth - canvasWidthL > 0 ?
+            (availableWidth - canvasWidthL) - (x + w) :
+            (availableWidth) - (x + w);
 
-        rule.left.style.left = x + "px";
-        rule.right.style.right = rightWidth + "px";
-      }
+          left = `${x}px`;
+          right = `${rightWidth}px`;
+        }
+        fastdom.mutate(function () {
+          styleLeft.setProperty('left', left);
+          styleRight.setProperty('right', right);
+        });
+      });
     }
 
     function simpleColumnCalc(canvasWidth, w, x, i, theColumns, rule) {
-      if (isRTL()) {
-        var leftWidth = canvasWidth - (w + x);
-        var rightWidth = x;
+      fastdom.measure(function () {
+        let {style: styleLeft} = rule.left,
+          {style: styleRight} = rule.right;
+        let leftWidth = '',
+          rightWidth = '';
+        if (isRTL()) {
+          leftWidth = `${canvasWidth - (w + x)}px`;
+          rightWidth = `${x}px`;
+        } else {
+          leftWidth = `${x}px`;
+          rightWidth = `${canvasWidth - (w + x)}px`;
+        }
 
-        var totalWidth = theColumns.reduce((sum, column) => sum + column.width, 0);
-
-        rule.left.style.left = leftWidth + "px";
-        rule.right.style.right = rightWidth + "px";
-      } else {
-        var leftWidth = x;
-        var rightWidth = canvasWidth - (w + x);
-
-        rule.left.style.left = leftWidth + "px";
-        rule.right.style.right = rightWidth + "px";
-      }
+        fastdom.mutate(function () {
+          styleLeft.setProperty('left', leftWidth);
+          styleRight.setProperty('right', rightWidth);
+        });
+      });
     }
 
     function setSortColumn(columnId, ascending) {
@@ -2853,7 +2874,7 @@
           cellElemt.append(result);
         }
       }
-      
+
       rowElemt.append(cellElemt)
 
       setRowCacheCellColspan(row, cell, colspan);
@@ -3141,14 +3162,7 @@
       if (!initialized) { return; }
 
       var dataLengthIncludingAddNew = getDataLengthIncludingAddNew();
-      var numberOfRows = 0;
       var oldH = ( hasFrozenRows && !options.frozenBottom ) ? $canvasBottomL.height() : $canvasTopL.height();
-
-      if (hasFrozenRows ) {
-        var numberOfRows = getDataLength() - options.frozenRow;
-      } else {
-        var numberOfRows = dataLengthIncludingAddNew + (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0);
-      }
 
       const items = typeof data.getItems === 'function' ? data.getItems() : data;
       const groups = typeof data.getGroups === 'function' ? data.getGroups() : [];
@@ -3438,7 +3452,7 @@
     }
 
     function renderRows(range) {
-      const elemtsL = document.createElement('div');
+      let elemtsL = document.createElement('div'),
         stringArrayR = [],
         rows = [],
         needToReselectCell = false,
@@ -3647,7 +3661,7 @@
     function _handleScroll(isMouseWheel) {
       var maxScrollDistanceY = $viewportScrollContainerY[0].scrollHeight - $viewportScrollContainerY[0].clientHeight;
       var maxScrollDistanceX = $viewportScrollContainerY[0].scrollWidth - $viewportScrollContainerY[0].clientWidth;
-      
+
       // Ceiling the max scroll values
       if (scrollTop > maxScrollDistanceY) {
         scrollTop = maxScrollDistanceY;
@@ -4295,7 +4309,7 @@
             : frozenRowsHeight;
         }
 
-        cell = getCellFromPoint($activeCellOffset.left, Math.ceil($activeCellOffset.top) - rowOffset);
+        let cell = getCellFromPoint($activeCellOffset.left, Math.ceil($activeCellOffset.top) - rowOffset);
 
         activeRow = cell.row;
         activeCell = activePosX = activeCell = activePosX = getCellFromNode(activeCellNode[0]);
