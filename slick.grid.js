@@ -715,110 +715,105 @@ import fastdom from "fastdom";
     }
 
     function updateCanvasWidth(forceColumnWidthsUpdate) {
-      fastdom.measure(function () {
 
-        var oldCanvasWidth = canvasWidth;
-        var oldCanvasWidthL = canvasWidthL;
-        var oldCanvasWidthR = canvasWidthR;
-        var widthChanged;
-        canvasWidth = getCanvasWidth();
+      var oldCanvasWidth = canvasWidth;
+      var oldCanvasWidthL = canvasWidthL;
+      var oldCanvasWidthR = canvasWidthR;
+      var widthChanged;
+      canvasWidth = getCanvasWidth();
 
-        widthChanged = canvasWidth !== oldCanvasWidth || canvasWidthL !== oldCanvasWidthL || canvasWidthR !== oldCanvasWidthR;
+      widthChanged = canvasWidth !== oldCanvasWidth || canvasWidthL !== oldCanvasWidthL || canvasWidthR !== oldCanvasWidthR;
 
-        getHeadersWidth();
+      getHeadersWidth();
+      if (widthChanged || hasFrozenColumns() || hasFrozenRows) {
+        $canvasTopL.width(canvasWidthL);
 
-        fastdom.mutate(function () {
-          if (widthChanged || hasFrozenColumns() || hasFrozenRows) {
-            $canvasTopL.width(canvasWidthL);
+        $headerL.width(headersWidthL);
+        $headerR.width(headersWidthR);
 
-            $headerL.width(headersWidthL);
-            $headerR.width(headersWidthR);
-
-            if (hasFrozenColumns()) {
-              $canvasTopR.width(canvasWidthR);
-              if (options.fullWidthRows) {
-                $canvasTopR.css("min-width", "100%");
-              }
-
-              $paneHeaderL.width(canvasWidthL);
-              const viewPortCanvasWidthL = viewportW - canvasWidthL;
-              if (isRTL()) {
-                $paneHeaderR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
-              } else {
-                $paneHeaderR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
-              }
-
-              $paneTopL.width(canvasWidthL);
-              if (isRTL()) {
-                $paneTopR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
-              } else {
-                $paneTopR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
-              }
-
-              $headerRowScrollerL.width(canvasWidthL);
-              $headerRowScrollerR.width(viewPortCanvasWidthL);
-
-              $headerRowL.width(canvasWidthL);
-              $headerRowR.width(canvasWidthR);
-
-              $footerRowScrollerL.width(canvasWidthL);
-              $footerRowScrollerR.width(viewPortCanvasWidthL);
-
-              $footerRowL.width(canvasWidthL);
-              $footerRowR.width(canvasWidthR);
-
-              $viewportTopL.width(canvasWidthL);
-              $viewportTopR.width(viewPortCanvasWidthL);
-
-              if (hasFrozenRows) {
-                $paneBottomL.width(canvasWidthL);
-                $paneBottomR.css({'left': canvasWidthL, 'right': canvasWidthR});
-
-                $viewportBottomL.width(canvasWidthL);
-                $viewportBottomR.width(viewPortCanvasWidthL);
-
-                $canvasBottomL.width(canvasWidthL);
-                $canvasBottomR.width(canvasWidthR);
-              }
-            } else {
-              $paneHeaderL.width('100%');
-
-              $paneTopL.width('100%');
-
-              $headerRowScrollerL.width('100%');
-
-              $headerRowL.width(canvasWidth);
-
-              $footerRowScrollerL.width('100%');
-
-              $footerRowL.width(canvasWidth);
-
-              $viewportTopL.width('100%');
-
-              if (hasFrozenRows) {
-                $viewportBottomL.width('100%');
-                $canvasBottomL.width(canvasWidthL);
-              }
-
-              if (options.fullWidthRows) {
-                $canvasTopL.css("min-width", "100%");
-              }
-            }
-
-            viewportHasHScroll = (canvasWidth > viewportW - scrollbarDimensions.width);
+        if (hasFrozenColumns()) {
+          $canvasTopR.width(canvasWidthR);
+          if (options.fullWidthRows) {
+            $canvasTopR.css("min-width", "100%");
           }
-          const canvasWidthViewPort = canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0);
-          $headerRowSpacerL.width(canvasWidthViewPort);
-          $headerRowSpacerR.width(canvasWidthViewPort);
 
-          $footerRowSpacerL.width(canvasWidthViewPort);
-          $footerRowSpacerR.width(canvasWidthViewPort);
-
-          if (widthChanged || forceColumnWidthsUpdate) {
-            applyColumnWidths();
+          $paneHeaderL.width(canvasWidthL);
+          const viewPortCanvasWidthL = viewportW - canvasWidthL;
+          if (isRTL()) {
+            $paneHeaderR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
+          } else {
+            $paneHeaderR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
           }
-        });
-      });
+
+          $paneTopL.width(canvasWidthL);
+          if (isRTL()) {
+            $paneTopR.css({'left': canvasWidthR, 'right': canvasWidthL, 'width': viewPortCanvasWidthL});
+          } else {
+            $paneTopR.css({'left': canvasWidthL, 'right': canvasWidthR, 'width': viewPortCanvasWidthL});
+          }
+
+          $headerRowScrollerL.width(canvasWidthL);
+          $headerRowScrollerR.width(viewPortCanvasWidthL);
+
+          $headerRowL.width(canvasWidthL);
+          $headerRowR.width(canvasWidthR);
+
+          $footerRowScrollerL.width(canvasWidthL);
+          $footerRowScrollerR.width(viewPortCanvasWidthL);
+
+          $footerRowL.width(canvasWidthL);
+          $footerRowR.width(canvasWidthR);
+
+          $viewportTopL.width(canvasWidthL);
+          $viewportTopR.width(viewPortCanvasWidthL);
+
+          if (hasFrozenRows) {
+            $paneBottomL.width(canvasWidthL);
+            $paneBottomR.css({'left': canvasWidthL, 'right': canvasWidthR});
+
+            $viewportBottomL.width(canvasWidthL);
+            $viewportBottomR.width(viewPortCanvasWidthL);
+
+            $canvasBottomL.width(canvasWidthL);
+            $canvasBottomR.width(canvasWidthR);
+          }
+        } else {
+          $paneHeaderL.width('100%');
+
+          $paneTopL.width('100%');
+
+          $headerRowScrollerL.width('100%');
+
+          $headerRowL.width(canvasWidth);
+
+          $footerRowScrollerL.width('100%');
+
+          $footerRowL.width(canvasWidth);
+
+          $viewportTopL.width('100%');
+
+          if (hasFrozenRows) {
+            $viewportBottomL.width('100%');
+            $canvasBottomL.width(canvasWidthL);
+          }
+
+          if (options.fullWidthRows) {
+            $canvasTopL.css("min-width", "100%");
+          }
+        }
+
+        viewportHasHScroll = (canvasWidth > viewportW - scrollbarDimensions.width);
+      }
+      const canvasWidthViewPort = canvasWidth + (viewportHasVScroll ? scrollbarDimensions.width : 0);
+      $headerRowSpacerL.width(canvasWidthViewPort);
+      $headerRowSpacerR.width(canvasWidthViewPort);
+
+      $footerRowSpacerL.width(canvasWidthViewPort);
+      $footerRowSpacerR.width(canvasWidthViewPort);
+
+      if (widthChanged || forceColumnWidthsUpdate) {
+        applyColumnWidths();
+      }
     }
 
     function disableSelection($target) {
