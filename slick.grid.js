@@ -3161,16 +3161,20 @@ import fastdom from "fastdom";
 
       const items = typeof data.getItems === 'function' ? data.getItems() : data;
       const groups = typeof data.getGroups === 'function' ? data.getGroups() : [];
-
-      const openGroups = groups.filter((group) => group.collapsed === 0);
-
-      const groupItems = openGroups.reduce((accumulator = [], group) => {
-        return accumulator.concat([{}, ...group.rows]);
+      const allGroups = groups.reduce((accumulator = [], group) => {
+        return accumulator.concat([group, ...group.groups]);
       }, []);
 
-      const rows = groupItems.length > 0 ? groupItems : items;
-      const totalRowsHeight = rows.map(row => row._rowHeight || options.rowHeight)
-        .reduce((total, height) => total + height, 0);
+      const openGroups = groups.reduce((accumulator = [], group) => {
+        return accumulator.concat([...group.groups]);
+      }, []).filter(group => group.collapsed == false)
+
+      const groupItems = openGroups.reduce((accumulator = [], group) => {
+        return accumulator.concat([...group.rows]);
+      }, []);
+
+      let totalRowsHeight = groupItems.concat(allGroups).map(( group, index) => getRowHeight(index))
+      .reduce((total, height) => total + height, 0);
 
       var tempViewportH = $viewportScrollContainerY.height();
       var oldViewportHasVScroll = viewportHasVScroll;
