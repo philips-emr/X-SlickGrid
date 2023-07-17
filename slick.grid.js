@@ -3161,19 +3161,25 @@ import fastdom from "fastdom";
 
       const items = typeof data.getItems === 'function' ? data.getItems() : data;
       const groups = typeof data.getGroups === 'function' ? data.getGroups() : [];
-      const allGroups = groups.reduce((accumulator = [], group) => {
-        return accumulator.concat([group, ...group.groups]);
-      }, []);
+      let allGroups, openGroups, groupItems = [];
+      if(groups.length > 0) {
+        allGroups = groups.reduce((accumulator = [], group) => {
+          return accumulator.concat([group, ...group.groups]);
+        }, []);
 
-      const openGroups = groups.reduce((accumulator = [], group) => {
-        return accumulator.concat([...group.groups]);
-      }, []).filter(group => group.collapsed == false)
+        openGroups = groups.reduce((accumulator = [], group) => {
+          return accumulator.concat([...group.groups]);
+        }, []).filter(group => group.collapsed == false)
 
-      const groupItems = openGroups.reduce((accumulator = [], group) => {
-        return accumulator.concat([...group.rows]);
-      }, []);
+        groupItems = openGroups.reduce((accumulator = [], group) => {
+          return accumulator.concat([...group.rows]);
+        }, []).concat(allGroups);
 
-      let totalRowsHeight = groupItems.concat(allGroups).map(( group, index) => getRowHeight(index))
+      } else {
+        groupItems = items;
+      }
+
+      let totalRowsHeight = groupItems.map(( group, index) => getRowHeight(index))
       .reduce((total, height) => total + height, 0);
 
       var tempViewportH = $viewportScrollContainerY.height();
