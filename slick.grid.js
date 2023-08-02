@@ -3169,10 +3169,25 @@ import fastdom from "fastdom";
       }, []);
 
       const rows = groupItems.length > 0 ? groupItems : items;
-      const totalRowsHeight = rows.map(row => row._rowHeight || options.rowHeight)
-        .reduce((total, height) => total + height, 0);
-
+      
       var tempViewportH = $viewportScrollContainerY.height();
+
+       let totalRowsHeight = 0;
+        const sumHeight = (groups) => {
+            groups.map(subgroup => {
+                totalRowsHeight += options.rowHeight;
+                if (subgroup.groups && subgroup.groups.length && subgroup.collapsed === 0) {
+                    sumHeight(subgroup.groups);
+                    return;
+                }
+                if (subgroup.collapsed === 1) {
+                    return;
+                }
+                totalRowsHeight += subgroup.rows.map(row => row._rowHeight || options.rowHeight).reduce((total, height) => total + height, 0);
+            });
+        };
+        sumHeight(groups);
+
       var oldViewportHasVScroll = viewportHasVScroll;
       // with autoHeight, we do not need to accommodate the vertical scroll bar
       viewportHasVScroll = (!options.autoHeight && options.hasScrollBar) && (totalRowsHeight > tempViewportH);
