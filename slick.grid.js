@@ -3159,34 +3159,25 @@ import fastdom from "fastdom";
       var dataLengthIncludingAddNew = getDataLengthIncludingAddNew();
       var oldH = ( hasFrozenRows && !options.frozenBottom ) ? $canvasBottomL.height() : $canvasTopL.height();
 
-      const items = typeof data.getItems === 'function' ? data.getItems() : data;
       const groups = typeof data.getGroups === 'function' ? data.getGroups() : [];
-
-      const openGroups = groups.filter((group) => group.collapsed === 0);
-
-      const groupItems = openGroups.reduce((accumulator = [], group) => {
-        return accumulator.concat([{}, ...group.rows]);
-      }, []);
-
-      const rows = groupItems.length > 0 ? groupItems : items;
       
       var tempViewportH = $viewportScrollContainerY.height();
 
-       let totalRowsHeight = 0;
-        const sumHeight = (groups) => {
-            groups.map(subgroup => {
-                totalRowsHeight += options.rowHeight;
-                if (subgroup.groups && subgroup.groups.length && subgroup.collapsed === 0) {
-                    sumHeight(subgroup.groups);
-                    return;
-                }
-                if (subgroup.collapsed === 1) {
-                    return;
-                }
-                totalRowsHeight += subgroup.rows.map(row => row._rowHeight || options.rowHeight).reduce((total, height) => total + height, 0);
-            });
-        };
-        sumHeight(groups);
+      let totalRowsHeight = 0;
+      const sumHeight = (groups) => {
+        groups.map(subgroup => {
+          totalRowsHeight += options.rowHeight;
+          if (subgroup.collapsed === 1) {
+            return;
+          }
+          if (subgroup.groups && subgroup.groups.length && subgroup.collapsed === 0) {
+            sumHeight(subgroup.groups);
+            return;
+          }
+          totalRowsHeight += subgroup.rows.map(row => row._rowHeight || options.rowHeight).reduce((total, height) => total + height, 0);
+        });
+      };
+      sumHeight(groups);
 
       var oldViewportHasVScroll = viewportHasVScroll;
       // with autoHeight, we do not need to accommodate the vertical scroll bar
