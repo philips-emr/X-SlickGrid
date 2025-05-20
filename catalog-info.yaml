@@ -1,0 +1,13 @@
+# yamllint disable-file
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "emr-x-slickgrid"
+  description: "SlickGrid is an advanced JavaScript grid/spreadsheet component"
+  title: "X-SlickGrid"
+  tags:
+    - emr
+spec:
+  type: "library"
+  owner: "group:default/emr-tasy-framework-contributors"
+  lifecycle: "production"
