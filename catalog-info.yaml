@@ -7,6 +7,16 @@ metadata:
   title: "X-SlickGrid"
   tags:
     - emr
+  links:
+    - url: https://fortify.philips.com/ssc/html/ssc/version/18120/audit?filterset=69608e28-5b92-4f48-98c2-d9c6d91fa347&orderby=friority&viewTab=code
+      title: Fortify
+      icon: docs
+    - url: https://blackduck.philips.com/api/projects/28c5134a-5571-4796-9495-380f58af0010/versions/9573296e-b8d4-4f48-bd7e-ce115ec5fe26/components?filter=bomInclusion%3Afalse&filter=bomMatchInclusion%3Afalse&filter=bomMatchReviewStatus%3Areviewed&limit=100&offset=0
+      title: BlackDuck
+      icon: docs          
+    annotations:
+        blackduck/project: EMR-CM-TasyFrameworkDependencies/X-SlickGrid
+        fortify/project: EMR/X-SlickGrid
 spec:
   type: "library"
   owner: "group:default/emr-tasy-framework-contributors"
